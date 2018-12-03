@@ -5,15 +5,12 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.Display;
-import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -173,7 +170,7 @@ public class FilterSelectorActivity extends AppCompatActivity {
 
     // https://stackoverflow.com/questions/23902892/how-to-programmatically-trigger-the-touch-event-in-android for no button //todo: maybe come up with a less sketchy way to dismiss the dialog from its no button
     // otherwise the back button takes you back to the main activity and doesn't let you do anything
-    @Override
+    /*@Override
     public void onBackPressed(){
         new AlertDialog.Builder(FilterSelectorActivity.this)
                 .setTitle(R.string.dialog_quit_prompt)
@@ -183,7 +180,7 @@ public class FilterSelectorActivity extends AppCompatActivity {
                 .setCancelable(true)
                 .create().show();
 
-    }
+    }*/
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
