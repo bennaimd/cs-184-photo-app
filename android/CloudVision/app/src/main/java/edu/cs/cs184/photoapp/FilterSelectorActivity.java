@@ -130,16 +130,18 @@ public class FilterSelectorActivity extends AppCompatActivity {
         MainActivity.scaleBitmapDown( MainActivity.myPhoto,1000).compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] byteArray = stream.toByteArray();
 
+        ArrayList<CustomFilter> customFilters = CustomFilters.getFilters(MainActivity.features, MainActivity.percentCertainties, this.getApplicationContext());
+
         ArrayList<Pair<Filter,String>> currentArray = CustomFilters.getFiltersInOrder(MainActivity.percentCertainties,MainActivity.features,this.getApplicationContext());
         Toast.makeText(getContext(),"size: " + currentArray.size(), Toast.LENGTH_LONG).show();
         for(int i=0; i<currentArray.size();i++){
 
-            FilterFragment currentFrag = FilterFragment.newInstance(byteArray,i,currentArray.get(i).second);
+            FilterFragment currentFrag = FilterFragment.newInstance(byteArray,i,customFilters.get(i).getFilterName(), customFilters.get(i).getFeatures(), customFilters.get(i).getCerts());
             mFilterFragments.add(currentFrag);
             pagerAdapter.addFragment(currentFrag);
 
 
-            mTabLayout.addTab(mTabLayout.newTab().setText(currentArray.get(i).second));
+            mTabLayout.addTab(mTabLayout.newTab().setText(customFilters.get(i).getFilterName()));
 
             // fixed: set new ontablistener to select the right fragment
             // solution: blank tab in layout was pushing them all forward by 1, removed blank tab

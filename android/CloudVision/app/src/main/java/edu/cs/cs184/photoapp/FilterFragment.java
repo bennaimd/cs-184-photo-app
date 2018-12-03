@@ -1,5 +1,7 @@
 package edu.cs.cs184.photoapp;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,6 +28,7 @@ import com.zomato.photofilters.imageprocessors.subfilters.SaturationSubFilter;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +38,7 @@ import static edu.cs.cs184.photoapp.MainActivity.scaleBitmapDown;
 // Filter fragment:
 
 public class FilterFragment extends Fragment {
-    // TODO: fix slider values for saturation. Detailed instructions included below.
+
     // TODO: add save functionality
     // TODO: create some interactable to view which feature(s) corresponded and what their percentages were.
 
@@ -53,6 +56,9 @@ public class FilterFragment extends Fragment {
     private int inIndex;
     private String inFilterName;
 
+    private String[] features;
+    private Double[] certainties;
+
 
     // determines reasonable resolutions for the mipmap in order to maximize fidelty and framerate
     final int MIPMAP_MAX_DIMENSION = 1000;
@@ -66,6 +72,8 @@ public class FilterFragment extends Fragment {
     // save sub filters to a map so we don't compound filters when adding the same type of subfilter
     private Map<String,ArrayList<SubFilter>> filterMap;
 
+    private Filter autoFilter;
+
 
     private ImageView imageView;
 
@@ -73,12 +81,17 @@ public class FilterFragment extends Fragment {
     public FilterFragment() {
     }
 
-    public static FilterFragment newInstance(byte[] param1, int param2, String param3) {
+    public static FilterFragment newInstance(byte[] param1, int param2, String param3, Object[] feats, Object[] certs) {
         FilterFragment fragment = new FilterFragment();
+        Filter test = new Filter();
         Bundle args = new Bundle();
         args.putByteArray(ARG_PARAM1, param1);
         args.putInt(ARG_PARAM2, param2);
         args.putString(ARG_PARAM3, param3);
+
+        // TODO: clean this up
+        args.putSerializable("feats", feats);
+        args.putSerializable("certs", certs);
 
 
 
@@ -127,6 +140,10 @@ public class FilterFragment extends Fragment {
             inBitmap = getArguments().getByteArray(ARG_PARAM1);
             inIndex = getArguments().getInt(ARG_PARAM2);
             inFilterName = getArguments().getString(ARG_PARAM3);
+            Object[] rawFeat = (Object[]) getArguments().getSerializable("feats");
+            features = Arrays.copyOf(rawFeat, rawFeat.length, String[].class);
+            Object[] rawCert = (Object[]) getArguments().getSerializable("certs");
+            certainties = Arrays.copyOf(rawCert, rawCert.length, Double[].class);
 
 
             // try to decode the bitmap passed.
@@ -162,9 +179,7 @@ public class FilterFragment extends Fragment {
         brightnessSlider.setProgress(100);
 
 
-        // TODO: set on a nonlinear scale, but display on a linear scale. We don't want the user to be able to set the entire image gray.
-        // TODO: 50 should be the lowest, 200 should be the highest, and 100 should be in the middle (where it starts). The display should still progress linearly.
-        // TODO: See the slider listener code and how it handles the change and text, and change it
+
 
         final SeekBar contrastSlider = (SeekBar) getView().findViewById(R.id.seekBar2);
         final TextView contrastLabel = (TextView) getView().findViewById(R.id.textView2);
@@ -183,9 +198,13 @@ public class FilterFragment extends Fragment {
         final Button button1 = (Button) getView().findViewById(R.id.button1);
         final Button ResetButton = (Button) getView().findViewById(R.id.button2);
 
-        final Filter mFilter = CustomFilters.getFilter(inFilterName,FilterSelectorActivity.getContext());
 
-        addToFilterMap("myfilter",(ArrayList) mFilter.getSubFilters());
+        // removed automatic filter from user edits, this way the user edits will edit the filtered picture instead of blending the edits
+        autoFilter = CustomFilters.getFilter(inFilterName,FilterSelectorActivity.getContext());
+
+        //addToFilterMap("myfilter",(ArrayList) mFilter.getSubFilters());
+        //final Filter mFilter = CustomFilters.getFilter(inFilterName,FilterSelectorActivity.getContext());
+
         imageView.setImageBitmap(getBitmap());
 
         updateMipMap();
@@ -194,7 +213,22 @@ public class FilterFragment extends Fragment {
         infoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(FilterSelectorActivity.getContext(),"Implement something that pops up with information on the features that matched.", Toast.LENGTH_LONG).show();
+                AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create(); //Read Update
+                alertDialog.setTitle("Features Applicable to this Filter:");
+                String message = "";
+                for(int i=0; i<features.length; i++){
+                    DecimalFormat d = new DecimalFormat("0.00");
+                    message = message + features[i] + " : " + d.format(certainties[i]) + "% certain \n";
+                }
+                alertDialog.setMessage(message);
+
+                alertDialog.setButton("Continue..", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // here you can add functions
+                    }
+                });
+
+                alertDialog.show();  //<-- See This!
             }
         });
 
@@ -243,8 +277,8 @@ public class FilterFragment extends Fragment {
                 brightnessLabel.setText("Brightness: " + brightness);
                 ArrayList<SubFilter> a = new ArrayList<>();
                 a.add(new BrightnessSubFilter(brightness));
-                Filter f = new Filter();
-                f.addSubFilter(a.get(0));
+                //Filter f = new Filter();
+                //f.addSubFilter(a.get(0));
                 addToFilterMap("brightness",a);
                 imageView.setImageBitmap(getFilter().processFilter(getMipMap()));
             }
@@ -266,14 +300,16 @@ public class FilterFragment extends Fragment {
         contrastSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                Float contrast = (float) (.0f + i * .01f);
-                DecimalFormat d = new DecimalFormat("0.00");
-                contrastLabel.setText("Contrast: "+d.format(contrast));
+                // minimum contrast is .5
+                Float contrast = (float) (.0f + (i+50) * .01f);
+                Float displayNum = (contrast - 1.5f) * 100;
+                DecimalFormat d = new DecimalFormat("0");
+                contrastLabel.setText("Contrast: "+d.format(displayNum));
                 ArrayList<SubFilter> a = new ArrayList<>();
                 a.add(new ContrastSubFilter(contrast));
                 addToFilterMap("contrast", a);
-                Filter f = new Filter();
-                f.addSubFilter(a.get(0));
+                //Filter f = new Filter();
+                //f.addSubFilter(a.get(0));
                 imageView.setImageBitmap(getFilter().processFilter(getMipMap()));
             }
 
@@ -298,8 +334,9 @@ public class FilterFragment extends Fragment {
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
 
                 Float saturation = (float)(.0f + i * .01f);
-                DecimalFormat d = new DecimalFormat("0.00");
-                saturationLabel.setText("Saturation: " + d.format(saturation));
+                Float displayNum = (saturation - 1.0f) * 100;
+                DecimalFormat d = new DecimalFormat("0");
+                saturationLabel.setText("Saturation: " + d.format(displayNum));
                 ArrayList<SubFilter> a = new ArrayList<>();
                 a.add(new SaturationSubFilter(saturation));
                 addToFilterMap("saturation",a);
@@ -349,6 +386,9 @@ public class FilterFragment extends Fragment {
 
     private Filter getFilter() {
         Filter filters = new Filter();
+        if(autoFilter != null){
+            filters.addSubFilters(autoFilter.getSubFilters());
+        }
         for( ArrayList<SubFilter> a: filterMap.values())
             filters.addSubFilters( a);
         return filters;
