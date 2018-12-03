@@ -104,6 +104,8 @@
             android:layout_marginBottom="8dp"
             android:maxHeight="20dp"
             android:minHeight="20dp"
+            android:progressDrawable="@drawable/seek_bar"
+            android:thumb="@drawable/custom_thumb"
 
             app:layout_constraintBottom_toTopOf="@+id/textView2"
             app:layout_constraintEnd_toEndOf="parent"
@@ -127,10 +129,13 @@
         <SeekBar
             android:id="@+id/seekBar2"
             android:layout_width="0dp"
-            android:layout_height="17dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
+            android:progressDrawable="@drawable/seek_bar"
+            android:thumb="@drawable/custom_thumb"
+
             app:layout_constraintBottom_toTopOf="@+id/textView3"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -157,6 +162,9 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="16dp"
+            android:progressDrawable="@drawable/seek_bar"
+            android:thumb="@drawable/custom_thumb"
+
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

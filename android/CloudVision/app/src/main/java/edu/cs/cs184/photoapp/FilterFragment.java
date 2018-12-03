@@ -214,14 +214,16 @@ public class FilterFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create(); //Read Update
-                alertDialog.setTitle("Features Applicable to this Filter:");
-                String message = "";
-                for(int i=0; i<features.length; i++){
-                    DecimalFormat d = new DecimalFormat("0.00");
-                    message = message + features[i] + " : " + d.format(certainties[i]) + "% certain \n";
+                if(features.length!=0) {
+                    alertDialog.setTitle("Features Applicable to This Filter:");
+                    String message = "";
+                    for (int i = 0; i < features.length; i++) {
+                        DecimalFormat d = new DecimalFormat("0.00");
+                        message = message + features[i] + " : " + d.format(certainties[i]) + "% certain \n";
+                    }
+                    alertDialog.setMessage(message);
                 }
-                alertDialog.setMessage(message);
-
+                else alertDialog.setTitle("No Applicable Features. \n\n");
                 alertDialog.setButton("Continue..", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         // here you can add functions
