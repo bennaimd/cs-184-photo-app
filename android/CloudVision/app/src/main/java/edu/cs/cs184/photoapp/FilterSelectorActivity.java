@@ -1,21 +1,32 @@
 package edu.cs.cs184.photoapp;
 
 
+import android.Manifest;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
+import android.view.View;
 import android.view.WindowManager;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class FilterSelectorActivity extends AppCompatActivity {
 
@@ -193,6 +204,19 @@ public class FilterSelectorActivity extends AppCompatActivity {
         state.putInt("tab",mTabLayout.getSelectedTabPosition());
         state.putBundle("main",state);
 
+
+    }
+
+    //storage
+
+    public void saveImage(View view){
+        if(StorageHelper.isExternalStorageWritable() &&  (PermissionUtils.requestPermission(this, MainActivity.WRITE_EXTERNAL_STORAGE_REQUEST, Manifest.permission.WRITE_EXTERNAL_STORAGE)) ){
+            DateFormat date = new SimpleDateFormat("dd-MM-yyy HH:mm:ss z");
+                    //todo allow for custom name, create fragment for save options,
+            String name = "EyePhoto_" + date.toString();
+            String description = MainActivity.myPhoto.toString();
+            MediaStore.Images.Media.insertImage(getContentResolver(),MainActivity.myPhoto, name, description);
+        }
 
     }
 
