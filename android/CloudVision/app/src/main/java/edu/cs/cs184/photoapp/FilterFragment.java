@@ -6,15 +6,21 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -26,11 +32,18 @@ import com.zomato.photofilters.imageprocessors.subfilters.BrightnessSubFilter;
 import com.zomato.photofilters.imageprocessors.subfilters.ContrastSubFilter;
 import com.zomato.photofilters.imageprocessors.subfilters.SaturationSubFilter;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import static edu.cs.cs184.photoapp.MainActivity.scaleBitmapDown;
 
@@ -55,6 +68,7 @@ public class FilterFragment extends Fragment {
     private byte[] inBitmap;
     private int inIndex;
     private String inFilterName;
+    private String savedImageName;
 
     private String[] features;
     private Double[] certainties;
@@ -197,6 +211,7 @@ public class FilterFragment extends Fragment {
         final Button infoButton = (Button) getView().findViewById(R.id.button);
         final Button button1 = (Button) getView().findViewById(R.id.button1);
         final Button ResetButton = (Button) getView().findViewById(R.id.button2);
+        final ImageButton saveButton = (ImageButton) getView().findViewById(R.id.saveButton);
 
 
         // removed automatic filter from user edits, this way the user edits will edit the filtered picture instead of blending the edits
@@ -208,6 +223,58 @@ public class FilterFragment extends Fragment {
         imageView.setImageBitmap(getBitmap());
 
         updateMipMap();
+        
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if(StorageHelper.isExternalStorageWritable()){
+                    //choose filename
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setTitle("Save Image As");
+                    final EditText textName = new EditText(getContext());
+                    DateFormat date = new SimpleDateFormat("dd-MM-yyy HH:mm:ss z");
+                    Date cal = Calendar.getInstance().getTime();
+                    textName.setHint("PhotoApp_" + date.format(cal));
+                    textName.setInputType(InputType.TYPE_CLASS_TEXT);
+                    builder.setView(textName);
+                    builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            savedImageName = textName.getText().toString();
+                            if(savedImageName.equals(""))
+                                savedImageName = "PhotoApp_" + date.format(cal);
+                            cachedBitmap =  ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+                            String url = StorageHelper.insertImage(getActivity().getContentResolver(), cachedBitmap, savedImageName);
+                            Toast.makeText(getContext(), "Image:" + savedImageName + " saved to Gallery", Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+
+                    builder.show();
+
+                    //shows image in gallery
+                    /*
+                    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                    File f = new File(url);
+                    Uri contentUri = Uri.fromFile(f);
+                    mediaScanIntent.setData(contentUri);
+                    getActivity().sendBroadcast(mediaScanIntent);
+                    */
+                }
+
+                else
+                    Toast.makeText(getContext(), "Image not saved", Toast.LENGTH_SHORT).show();
+
+            }
+        });
 
 
         infoButton.setOnClickListener(new View.OnClickListener() {
@@ -401,4 +468,5 @@ public class FilterFragment extends Fragment {
         for(ArrayList<SubFilter> a: filterMap.values()) result += a.size();
         return  result;
     }
+
 }
