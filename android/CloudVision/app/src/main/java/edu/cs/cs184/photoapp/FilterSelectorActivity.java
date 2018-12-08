@@ -3,7 +3,6 @@ package edu.cs.cs184.photoapp;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
@@ -16,9 +15,13 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
+
+import com.zomato.photofilters.imageprocessors.Filter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -30,7 +33,16 @@ import java.util.Date;
 
 public class FilterSelectorActivity extends AppCompatActivity {
 
-    //Daniel: adapted from my homework 3 implementation
+    // TODO: sort filters, maybe display some info, mark the suggested ones
+
+    private static Context mContext;
+
+    public static Context getContext(){
+        return mContext;
+    }
+
+
+    // Daniel: adapted from my homework 3 implementation
 
     public static CustomFragmentsPagerAdapter customFragmentsPagerAdapter;
     private ViewPager mViewPager;
@@ -60,7 +72,7 @@ public class FilterSelectorActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_filter_selector);
         updateWidth(this);
-
+        mContext = getApplicationContext();
 
         customFragmentsPagerAdapter = new CustomFragmentsPagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.fragmentsPager);
@@ -120,42 +132,30 @@ public class FilterSelectorActivity extends AppCompatActivity {
         /*todo: generate the list of filters to apply, then apply them on each instance of a fragment.
         / todo: We could also generate an array of them right after the result is received in main activity.*/
 
-        // Daniel: taken from my hw 4 implementation.
+        // Daniel: very roughly adapted from my hw 4 implementation.
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        MainActivity.myPhoto.compress(Bitmap.CompressFormat.PNG, 100, stream);
+
+        // Don't want to send a full res bitmap because of memory and processing cost
+        MainActivity.scaleBitmapDown( MainActivity.myPhoto,1000).compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] byteArray = stream.toByteArray();
 
-        for(int i=0; i<MainActivity.features.size(); i++)
-        {
+        ArrayList<CustomFilter> customFilters = CustomFilters.getFilters(MainActivity.features, MainActivity.percentCertainties, this.getApplicationContext());
 
-            /*Bundle args = new Bundle();
-            args.putString(ARG_PARAM1, MainActivity.features.get(i));
-            args.putDouble(ARG_PARAM2, MainActivity.percentCertainties.get(i));
-            args.putByteArray(ARG_PARAM3,byteArray);
-*/
-            //instantiate new fragment, add it to the list
-            FilterFragment currentFrag = FilterFragment.newInstance(MainActivity.features.get(i),MainActivity.percentCertainties.get(i),byteArray);
+        ArrayList<Pair<Filter,String>> currentArray = CustomFilters.getFiltersInOrder(MainActivity.percentCertainties,MainActivity.features,this.getApplicationContext());
+        Toast.makeText(getContext(),"size: " + currentArray.size(), Toast.LENGTH_LONG).show();
+        for(int i=0; i<currentArray.size();i++){
+
+            FilterFragment currentFrag = FilterFragment.newInstance(byteArray,i,customFilters.get(i).getFilterName(), customFilters.get(i).getFeatures(), customFilters.get(i).getCerts());
             mFilterFragments.add(currentFrag);
             pagerAdapter.addFragment(currentFrag);
 
-            //create a transaction to create the view of the fragment
-            /*FragmentTransaction ft =  getSupportFragmentManager().beginTransaction();
-            ft.setCustomAnimations(android.R.anim.fade_in  ,android.R.anim.fade_out);
-            ft.add(R.id.selector_layout,currentFrag).commit();*/
 
-            mTabLayout.addTab(mTabLayout.newTab().setText(MainActivity.features.get(i).substring(0,1).toUpperCase()+MainActivity.features.get(i).substring(1)));
-            //Fragment.instantiate(this, FilterFragment.class.getName(), args);
+            mTabLayout.addTab(mTabLayout.newTab().setText(customFilters.get(i).getFilterName()));
 
-
-            //fixed: set new ontablistener to select the right fragment
+            // fixed: set new ontablistener to select the right fragment
             // solution: blank tab in layout was pushing them all forward by 1, removed blank tab
 
-            //todo: make the tabs scrollable correctly
         }
-
-        /*for(FilterFragment f: mFilterFragments) {
-            pagerAdapter.addFragment(f, "test fragment", Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888), "test filter", 88.8);
-        }*/
         pager.setAdapter(pagerAdapter);
 
     }
@@ -172,7 +172,6 @@ public class FilterSelectorActivity extends AppCompatActivity {
         d.getMetrics(m);
         getDisplayWidth = m.widthPixels;
         getDisplayHeight = m.heightPixels;
-        //Log.e(",","updated width to: " + getDisplayWidth);
     }
 
     public static int getWidth()
@@ -181,14 +180,19 @@ public class FilterSelectorActivity extends AppCompatActivity {
     }
     public static int getHeight(){return getDisplayHeight;}
 
+    // https://stackoverflow.com/questions/23902892/how-to-programmatically-trigger-the-touch-event-in-android for no button //todo: maybe come up with a less sketchy way to dismiss the dialog from its no button
+    // otherwise the back button takes you back to the main activity and doesn't let you do anything
+    /*@Override
+    public void onBackPressed(){
+        new AlertDialog.Builder(FilterSelectorActivity.this)
+                .setTitle(R.string.dialog_quit_prompt)
+                .setMessage("\n")
+                .setPositiveButton("Yes", (dialog, which) -> this.finishAffinity())
+                .setNegativeButton("No",(dialog,which)-> MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis()+10,MotionEvent.ACTION_UP,0f,0f,0))
+                .setCancelable(true)
+                .create().show();
 
-
-
-    // a function to retrieve the package name
-    public static String getPackageName(Context context) {
-        ApplicationInfo applicationInfo = context.getApplicationInfo();
-        return applicationInfo.packageName;
-    }
+    }*/
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -203,8 +207,6 @@ public class FilterSelectorActivity extends AppCompatActivity {
         state.putInt("current",mViewPager.getCurrentItem());
         state.putInt("tab",mTabLayout.getSelectedTabPosition());
         state.putBundle("main",state);
-
-
     }
 
     //storage
