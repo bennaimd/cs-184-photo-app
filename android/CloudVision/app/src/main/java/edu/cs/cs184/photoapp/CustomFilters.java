@@ -18,7 +18,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.Math.max;
+
 public class CustomFilters {
+
+    final static int MIN_FILTERS = 5;
 
     // TODO: Add all of your filters, translate data on the googledoc into the corresponding functions, and replace the placeholder code.
     // TODO: come up with goofy ass names like the ones from sample filters
@@ -44,7 +48,9 @@ public class CustomFilters {
                     //customFilter.addFeature(features.get(j), percentCertainties.get(j));
                 }
 
-                if(getAllFeatures().get(i).contains(features.get(j))){
+                // adds newline to end of feature which allows it to search for an exact match
+                // e.g. if looking for photograph, "nature photography\n" contains "photograph", but not "photograph\n"
+                if(getAllFeatures().get(i).contains(features.get(j)+"\n")){
                     customFilter.addFeature(features.get(j), percentCertainties.get(j));
                 }
             }
@@ -55,17 +61,17 @@ public class CustomFilters {
             Log.d("Filter sorting", customFilter.getFilterName()+" has score: "+score);
             boolean entered = false;
             int index = 0;
-            while(!entered){
+            while(true){
                 // if empty, simply add
                 if(matchingFilters.size() == 0){
                     matchingFilters.add(customFilter);
-                    entered = true;
+                    break;
                 }
                 if(index < matchingFilters.size()) {
                     // if score >= score at index, add at index
                     if (score >= matchingFilters.get(index).getScore()){
                         matchingFilters.add(index, customFilter);
-                        entered = true;
+                        break;
                     }
 
                     // else check next index
@@ -75,15 +81,82 @@ public class CustomFilters {
                 // if score < all other scores, add at end
                 else{
                     matchingFilters.add(customFilter);
-                    entered = true;
+                    break;
                 }
             }
-            Log.d("Filter sorting", customFilter.getFilterName() + "entered at: "+index);
+            Log.d("Filter sorting", customFilter.getFilterName() + " entered at: "+index);
 
         }
 
+        // removes filters that don't match
+        boolean endFound = false;
+        int i=0;
+        while(!endFound) {
+            if(matchingFilters.get(i).getFilterName().equals("No Filter")) endFound = true;
+            else i++;
+        }
+        Log.d("filtersort", "end found at: "+i);
+        for(int j = matchingFilters.size()-1; j>max(i, 4); j--){
+            Log.d("filtersort", "Removing: "+matchingFilters.get(j).getFilterName());
+            matchingFilters.remove(j);
+
+        }
+
+
         return matchingFilters;
 
+    }
+
+
+    // TODO: Add filters, use this skeleton, then add to method to getFilters, name to getNames, and feature list to getFeatures
+    public static Filter getFILTERNAME(){
+        //specify constants
+
+        Filter filter = new Filter();
+
+        // filter.addSubfilter for all subfilters
+
+        return filter;
+    }
+
+    public static Filter getMacroFilter(Context context){
+        //specify constants
+        Point[] rgbKnots = new Point[5];
+        rgbKnots[0] = new Point(0,0);
+        rgbKnots[1] = new Point(64,40);
+        rgbKnots[2] = new Point(128,118);
+        rgbKnots[3] = new Point(191,185);
+        rgbKnots[4] = new Point(255,255);
+
+        Filter filter = new Filter();
+
+        filter.addSubFilter(new ToneCurveSubFilter(rgbKnots, null, null, null));
+        filter.addSubFilter(new VignetteSubFilter(context, 120));
+        filter.addSubFilter(new ContrastSubFilter(1.3f));
+        filter.addSubFilter(new BrightnessSubFilter(30));
+        filter.addSubFilter(new SaturationSubFilter(1.2f));
+
+        return filter;
+    }
+
+    public static Filter getPortraitFilter(Context context){
+        //specify constants
+        Point[] rgbKnots = new Point[5];
+        rgbKnots[0] = new Point(0,0);
+        rgbKnots[1] = new Point(64,50);
+        rgbKnots[2] = new Point(128,128);
+        rgbKnots[3] = new Point(191,195);
+        rgbKnots[4] = new Point(255,250);
+
+        Filter filter = new Filter();
+
+        filter.addSubFilter(new ToneCurveSubFilter(rgbKnots, null, null, null));
+        filter.addSubFilter(new VignetteSubFilter(context, 90));
+        filter.addSubFilter(new ContrastSubFilter(1.1f));
+        filter.addSubFilter(new BrightnessSubFilter(20));
+        filter.addSubFilter(new SaturationSubFilter(0.7f));
+
+        return filter;
     }
 
     public static Filter getNightVisionFilter(){
@@ -332,25 +405,389 @@ public class CustomFilters {
 
     // TODO: add your filters to this array in alphabetical order.
     public static ArrayList<Filter> getAllFilters(Context context){
-        return new ArrayList<>( Arrays.asList( new Filter[]{getAweStruckVibeFilter(),getBlueMessFilter(),getBwFilter(),getLimeStutterFilter(),getNightVisionFilter(),getNightWhisperFilter(),getPolaroidFilter(),getSepiaFilter(context),getStarLitFilter(),new Filter()}));
+        return new ArrayList<>( Arrays.asList( new Filter[]{getAweStruckVibeFilter(),getBlueMessFilter(),getBwFilter(),getLimeStutterFilter(),getMacroFilter(context),getNightVisionFilter(),getNightWhisperFilter(),getPolaroidFilter(),getPortraitFilter(context),getSepiaFilter(context),getStarLitFilter(),new Filter()}));
     }
 
     // TODO: add your filters' names to this array in alphabetical order.
     public static ArrayList<String> getAllNames(){
-        return new ArrayList<>( Arrays.asList(new String[]{"Awestruck Vibe","Blue Mess","Graphite","Lime Stutter","Night Vision","Night Whisper","Polaroid","Sepia","Star Lit","No Filter"}));
+        return new ArrayList<>( Arrays.asList(new String[]{"Awestruck Vibe","Blue Mess","Graphite","Lime Stutter","Macro","Night Vision","Night Whisper","Polaroid","Portrait","Sepia","Star Lit","No Filter"}));
     }
 
     public static ArrayList<String> getAllFeatures(){
         ArrayList<String> featureList = new ArrayList<>();
-        featureList.add(""); // awestruck vibe
-        featureList.add("building,house,home,prairie,nature,skyline,vehicle"); // blue mess / vintage for now
-        featureList.add("architecture,building,downtown,facade,home,house,infrastructure,landmark,metropolis,metropolitan area,prairie,rail transport,residential area,road,road trip,skyline,skyscraper,street,tower,tower block,town,urban area,window"); // graphite
-        featureList.add(""); // lime stutter
-        featureList.add("night,darkness,evening,astronomical object, space, astronomy, outer space, universe, backlighting"); // night vision
-        featureList.add(""); // night whisper
-        featureList.add("beauty,café au lait,caffè macchiato,cappuccino,coffee,coffee cup,cup,dish,espresso,fauna,finger food,flower,food,fried food,girl,human,ice cream,nature,selfie,snapshot,vegetable,vegetarian,food,wilderness,wildlife"); // polaroid
-        featureList.add("black and white,downtown,fixed link,highway,monochrome,monochrome photography,photograph,rail transport,snapshot,still life photography,track,transport,vacation,wood,wood stain,vehicle"); // sepia
-        featureList.add(""); // star lit
+        featureList.add("nature\n" + //                     start awestruck vibe
+                "\"nebula\n" +
+                "\"\n" +
+                "neighbourhood\n" +
+                "night\n" +
+                "ocean\n" +
+                "ophthalmology\n" +
+                "organ\n" +
+                "organism\n" +
+                "outer space\n" +
+                "party supply\n" +
+                "path\n" +
+                "pencil\n" +
+                "performance car\n" +
+                "personal luxury car\n" +
+                "photograph\n" +
+                "photography\n" +
+                "pier\n" +
+                "plaine\n" +
+                "plant\n" +
+                "plant stem\n" +
+                "plucked string instruments\n" +
+                "plywood\n" +
+                "prairie\n" +
+                "purple\n" +
+                "rail transport\n" +
+                "recipe\n" +
+                "reflection\n" +
+                "residential area\n" +
+                "ridge\n" +
+                "ristretto\n" +
+                "road\n" +
+                "road trip\n" +
+                "rodent\n" +
+                "marine mammal\n" +
+                "metropolis\n" +
+                "metropolitan area\n" +
+                "mist\n" +
+                "mixed use\n" +
+                "moisture\n" +
+                "monochrome\n" +
+                "monochrome photography\n" +
+                "morning\n" +
+                "motor vehicle\n" +
+                "mountain\n" +
+                "mountainous landforms\n" +
+                "musical instrument\n" +
+                "musical instrument accessory"); //         awestruck vibe
+        featureList.add("floor\n" + //                      start blue mess / vintage for now
+                "flooring\n" +
+                "flower\n" +
+                "flowering plant\n" +
+                "fog\n" +
+                "food\n" +
+                "fox squirrel\n" +
+                "freezing\n" +
+                "fried food\n" +
+                "fritter\n" +
+                "frost\n" +
+                "fun\n" +
+                "furniture\n" +
+                "girl\n" +
+                "grass\n" +
+                "grassland\n" +
+                "guitar\n" +
+                "hand\n" +
+                "hardwood\n" +
+                "highland\n" +
+                "highway\n" +
+                "hill\n" +
+                "home\n" +
+                "horizon\n" +
+                "house\n" +
+                "human\n" +
+                "ice cream\n" +
+                "infrastructure\n" +
+                "instant coffee\n" +
+                "interior design\n" +
+                "invertebrate\n" +
+                "iris\n" +
+                "jamaican blue mountain coffee\n" +
+                "jellyfish\n" +
+                "landmark\n" +
+                "lane\n" +
+                "light\n" +
+                "line\n" +
+                "male\n" +
+                "mammal\n" +
+                "marine biology\n" +
+                "marine invertebrates"); //                 end blue mess
+        featureList.add("architecture\n" + //               start graphite
+                "building\n" +
+                "downtown\n" +
+                "facade\n" +
+                "home\n" +
+                "house\n" +
+                "infrastructure\n" +
+                "landmark\n" +
+                "metropolis\n" +
+                "metropolitan area\n" +
+                "prairie\n" +
+                "rail transport\n" +
+                "residential area\n" +
+                "road\n" +
+                "road trip\n" +
+                "skyline\n" +
+                "skyscraper\n" +
+                "street\n" +
+                "tower\n" +
+                "tower block\n" +
+                "town\n" +
+                "urban area\n" +
+                "window"); //                               end graphite
+        featureList.add("shoe\n" + //                       start lime stutter
+                "shore\n" +
+                "silhouette\n" +
+                "sky\n" +
+                "skyline\n" +
+                "skyscraper\n" +
+                "snapshot\n" +
+                "snout\n" +
+                "snow\n" +
+                "space\n" +
+                "sports car\n" +
+                "spring\n" +
+                "square\n" +
+                "squirrel\n" +
+                "standing\n" +
+                "star\n" +
+                "steppe\n" +
+                "still life photography\n" +
+                "street\n" +
+                "string instrument\n" +
+                "sun\n" +
+                "sunglasses\n" +
+                "sunlight\n" +
+                "sunrise\n" +
+                "sunset\n" +
+                "table\n" +
+                "terrestrial animal\n" +
+                "tower\n" +
+                "tower block\n" +
+                "town\n" +
+                "toy\n" +
+                "track\n" +
+                "transport\n" +
+                "tree\n" +
+                "tropics\n" +
+                "tulip\n" +
+                "twig\n" +
+                "universe\n" +
+                "romance\n" +
+                "sand\n" +
+                "sea\n" +
+                "seals\n" +
+                "selfie\n" +
+                "shadow\n"); //                             end lime stutter
+        featureList.add("asphalt\n" + //                    start MACRO filter
+                        "beauty\n" +
+                        "branch\n" +
+                        "café au lait\n" +
+                        "caffè macchiato\n" +
+                        "caffeine\n" +
+                        "cappuccino\n" +
+                        "close up\n" +
+                        "coffee\n" +
+                        "coffee cup\n" +
+                        "cuban espresso\n" +
+                        "cup\n" +
+                        "dew\n" +
+                        "drop\n" +
+                        "espresso\n" +
+                        "eyelash\n" +
+                        "eyelash extensions\n" +
+                        "fauna\n" +
+                        "finger\n" +
+                        "finger food\n" +
+                        "flower\n" +
+                        "flowering plant\n" +
+                        "food\n" +
+                        "frost\n" +
+                        "grass\n" +
+                        "hand\n" +
+                        "ice cream\n" +
+                        "insect\n" +
+                        "instant coffee\n" +
+                        "invertebrate\n" +
+                        "iris\n" +
+                        "jamaican blue mountain coffee\n" +
+                        "larva\n" +
+                        "leaf\n" +
+                        "macro photography\n" +
+                        "mist\n" +
+                        "moisture\n" +
+                        "pencil\n" +
+                        "petal\n" +
+                        "plant\n" +
+                        "plant stem\n" +
+                        "sand\n" +
+                        "snapshot\n" +
+                        "still life photography\n" +
+                        "tulip\n" +
+                        "twig\n" +
+                        "vegetation\n" +
+                        "wildflower\n" +
+                        "woody plant"); //                  end macro
+        featureList.add("Night \n" + //                     start night vision
+                "Darkness\n" +
+                "Evening\n" +
+                "astronomical object\n" +
+                "space\n" +
+                "astronomy\n" +
+                "outer space\n" +
+                "universe\n" +
+                "backlighting"); //                         end night vision
+        featureList.add("vacation\n" + //                   start night whisper
+                "vegetable\n" +
+                "vegetarian food\n" +
+                "vegetation\n" +
+                "vehicle\n" +
+                "vertebrate\n" +
+                "vision care\n" +
+                "wall\n" +
+                "walrus\n" +
+                "water\n" +
+                "water resources\n" +
+                "wave\n" +
+                "whiskers\n" +
+                "wiener melange\n" +
+                "wilderness\n" +
+                "wildlife\n" +
+                "wind wave\n" +
+                "window\n" +
+                "winter\n" +
+                "wood\n" +
+                "wood stain\n" +
+                "woody plant\n" +
+                "yellow\n" +
+                "darkness\n" +
+                "dawn\n" +
+                "desk\n" +
+                "dish\n" +
+                "door\n" +
+                "downtown\n" +
+                "drop\n" +
+                "dusk\n" +
+                "ecoregion\n" +
+                "ecosystem\n" +
+                "electronic instrument\n" +
+                "emotion\n" +
+                "espresso\n" +
+                "evening\n" +
+                "extreme sport\n" +
+                "eyelash extensions\n" +
+                "eyewear"); //                              end night whisper
+        featureList.add("beauty\n" + //                     start polaroid
+                "café au lait\n" +
+                "caffè macchiato\n" +
+                "cappuccino\n" +
+                "coffee\n" +
+                "coffee cup\n" +
+                "cup\n" +
+                "dish\n" +
+                "espresso\n" +
+                "fauna\n" +
+                "finger food\n" +
+                "flower\n" +
+                "food\n" +
+                "fried food\n" +
+                "girl\n" +
+                "human\n" +
+                "ice cream\n" +
+                "nature\n" +
+                "selfie\n" +
+                "snapshot\n" +
+                "vegetable\n" +
+                "vegetarian food\n" +
+                "wilderness\n" +
+                "wildlife"); //                             end polaroid
+        featureList.add("angle\n" + //                      start portrait
+                "backlighting\n" +
+                "beauty\n" +
+                "black hair\n" +
+                "ceremony\n" +
+                "emotion\n" +
+                "eyelash\n" +
+                "eyelash extensions\n" +
+                "eyewear\n" +
+                "face\n" +
+                "field\n" +
+                "finger\n" +
+                "girl\n" +
+                "hand\n" +
+                "human\n" +
+                "human body\n" +
+                "iris\n" +
+                "male\n" +
+                "mammal\n" +
+                "man\n" +
+                "organism\n" +
+                "path\n" +
+                "photograph\n" +
+                "photography\n" +
+                "pier\n" +
+                "portrait\n" +
+                "reflection\n" +
+                "romance\n" +
+                "selfie\n" +
+                "silhouette\n" +
+                "standing\n" +
+                "sunglasses"); //                           end portrait
+        featureList.add("black and white\n" + //            start sepia
+                "downtown\n" +
+                "fixed link\n" +
+                "highway\n" +
+                "monochrome\n" +
+                "monochrome photography\n" +
+                "photograph\n" +
+                "rail transport\n" +
+                "snapshot\n" +
+                "still life photography\n" +
+                "track\n" +
+                "transport\n" +
+                "vacation\n" +
+                "wood\n" +
+                "wood stain\n" +
+                "vehicle"); //                              end sepia
+        featureList.add("angle\n" + //                      start star lit
+                "architecture\n" +
+                "area\n" +
+                "arecales\n" +
+                "asphalt\n" +
+                "astronomical object\n" +
+                "astronomy\n" +
+                "atmosphere\n" +
+                "automotive design\n" +
+                "autumn\n" +
+                "backlighting\n" +
+                "balloon\n" +
+                "beach\n" +
+                "bed\n" +
+                "black\n" +
+                "black and white\n" +
+                "blue\n" +
+                "brick\n" +
+                "building\n" +
+                "café au lait\n" +
+                "caffè macchiato\n" +
+                "caffeine\n" +
+                "calm\n" +
+                "cappuccino\n" +
+                "car\n" +
+                "ceremony\n" +
+                "circle\n" +
+                "city\n" +
+                "cityscape\n" +
+                "cloud\n" +
+                "cnidaria\n" +
+                "coast\n" +
+                "coffee\n" +
+                "coffee cup\n" +
+                "computer wallpaper\n" +
+                "cortado\n" +
+                "couch\n" +
+                "cuban espresso\n" +
+                "cup\n" +
+                "facade\n" +
+                "fauna\n" +
+                "field\n" +
+                "finger\n" +
+                "finger food\n" +
+                "fixed link\n" +
+                "flat white"); // end star lit
         featureList.add(""); // no filter
         return featureList;
     }

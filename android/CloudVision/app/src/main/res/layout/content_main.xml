@@ -20,7 +20,7 @@
         android:layout_marginTop="32dp"
         android:text="@string/greeting_text"
         android:textAlignment="center"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/colorLightText"
         android:textSize="24sp"
         android:textStyle="italic"
         app:layout_constraintEnd_toEndOf="parent"

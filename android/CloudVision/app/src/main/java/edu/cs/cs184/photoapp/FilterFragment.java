@@ -197,6 +197,7 @@ public class FilterFragment extends Fragment {
         final Button infoButton = (Button) getView().findViewById(R.id.button);
         final Button button1 = (Button) getView().findViewById(R.id.button1);
         final Button ResetButton = (Button) getView().findViewById(R.id.button2);
+        if(features.length < 1) infoButton.setVisibility(View.INVISIBLE);
 
 
         // removed automatic filter from user edits, this way the user edits will edit the filtered picture instead of blending the edits

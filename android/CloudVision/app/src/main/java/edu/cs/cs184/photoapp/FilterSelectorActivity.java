@@ -6,6 +6,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -111,6 +112,20 @@ public class FilterSelectorActivity extends AppCompatActivity {
 
         setupViewPager(mViewPager);
 
+        showFeatureDialog();
+
+
+    }
+
+
+    private void showFeatureDialog() {
+
+        FragmentManager fm = getSupportFragmentManager();
+
+        FeatureDialog featureList = FeatureDialog.newInstance("Some Title");
+        featureList.addData(MainActivity.features, MainActivity.percentCertainties);
+
+        featureList.show(fm, "fragment_edit_name");
 
     }
 
@@ -131,7 +146,7 @@ public class FilterSelectorActivity extends AppCompatActivity {
 
         ArrayList<Pair<Filter,String>> currentArray = CustomFilters.getFiltersInOrder(MainActivity.percentCertainties,MainActivity.features,this.getApplicationContext());
         Toast.makeText(getContext(),"size: " + currentArray.size(), Toast.LENGTH_LONG).show();
-        for(int i=0; i<currentArray.size();i++){
+        for(int i=0; i<customFilters.size();i++){
 
             FilterFragment currentFrag = FilterFragment.newInstance(byteArray,i,customFilters.get(i).getFilterName(), customFilters.get(i).getFeatures(), customFilters.get(i).getCerts());
             mFilterFragments.add(currentFrag);
