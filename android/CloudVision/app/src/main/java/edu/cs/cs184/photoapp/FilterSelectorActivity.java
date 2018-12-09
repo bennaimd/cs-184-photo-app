@@ -211,16 +211,6 @@ public class FilterSelectorActivity extends AppCompatActivity {
 
     //storage
 
-    public void saveImage(View view){
-        if(StorageHelper.isExternalStorageWritable() &&  (PermissionUtils.requestPermission(this, MainActivity.WRITE_EXTERNAL_STORAGE_REQUEST, Manifest.permission.WRITE_EXTERNAL_STORAGE)) ){
-            DateFormat date = new SimpleDateFormat("dd-MM-yyy HH:mm:ss z");
-                    //todo allow for custom name, create fragment for save options,
-            String name = "EyePhoto_" + date.toString();
-            String description = MainActivity.myPhoto.toString();
-            MediaStore.Images.Media.insertImage(getContentResolver(),MainActivity.myPhoto, name, description);
-        }
-
-    }
 
 
 
