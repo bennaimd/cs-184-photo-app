@@ -122,17 +122,27 @@ public class CustomFilters {
     public static Filter getMacroFilter(Context context){
         //specify constants
         Point[] rgbKnots = new Point[5];
-        rgbKnots[0] = new Point(0,0);
+        rgbKnots[0] = new Point(0,15);
         rgbKnots[1] = new Point(64,40);
         rgbKnots[2] = new Point(128,118);
-        rgbKnots[3] = new Point(191,185);
-        rgbKnots[4] = new Point(255,255);
+        rgbKnots[3] = new Point(191,195);
+        rgbKnots[4] = new Point(250,255);
+
+        Point[] redKnots = new Point[3];
+        redKnots[0] = new Point(10,0);
+        redKnots[1] = new Point(128,133);
+        redKnots[2] = new Point(245,255);
+
+        Point[] greenKnots = new Point[3];
+        greenKnots[0] = new Point(0,5);
+        greenKnots[1] = new Point(128,123);
+        greenKnots[2] = new Point(255,245);
 
         Filter filter = new Filter();
 
-        filter.addSubFilter(new ToneCurveSubFilter(rgbKnots, null, null, null));
+        filter.addSubFilter(new ToneCurveSubFilter(rgbKnots, redKnots, greenKnots, redKnots));
         filter.addSubFilter(new VignetteSubFilter(context, 120));
-        filter.addSubFilter(new ContrastSubFilter(1.3f));
+        filter.addSubFilter(new ContrastSubFilter(1.2f));
         filter.addSubFilter(new BrightnessSubFilter(30));
         filter.addSubFilter(new SaturationSubFilter(1.2f));
 
@@ -144,9 +154,9 @@ public class CustomFilters {
         Point[] rgbKnots = new Point[5];
         rgbKnots[0] = new Point(0,0);
         rgbKnots[1] = new Point(64,50);
-        rgbKnots[2] = new Point(128,128);
+        rgbKnots[2] = new Point(128,138);
         rgbKnots[3] = new Point(191,195);
-        rgbKnots[4] = new Point(255,250);
+        rgbKnots[4] = new Point(255,245);
 
         Filter filter = new Filter();
 
@@ -698,24 +708,44 @@ public class CustomFilters {
                 "backlighting\n" +
                 "beauty\n" +
                 "black hair\n" +
+                "boy\n" +
+                "brown hair\n" +
                 "ceremony\n" +
+                "chin\n" +
                 "emotion\n" +
+                "eye\n" +
+                "eyebrow\n" +
                 "eyelash\n" +
                 "eyelash extensions\n" +
                 "eyewear\n" +
                 "face\n" +
+                "face\n" +
+                "fashion model\n" +
                 "field\n" +
                 "finger\n" +
+                "forehead\n" +
                 "girl\n" +
+                "hair\n" +
+                "hair coloring\n" +
+                "hairstyle\n" +
                 "hand\n" +
+                "head\n" +
                 "human\n" +
                 "human body\n" +
+                "human hair color\n" +
                 "iris\n" +
+                "long hair\n" +
                 "male\n" +
                 "mammal\n" +
                 "man\n" +
+                "model\n" +
+                "neck\n" +
+                "nose\n" +
                 "organism\n" +
+                "outerwear\n" +
                 "path\n" +
+                "pattern\n" +
+                "person\n" +
                 "photograph\n" +
                 "photography\n" +
                 "pier\n" +
@@ -724,8 +754,11 @@ public class CustomFilters {
                 "romance\n" +
                 "selfie\n" +
                 "silhouette\n" +
+                "skin\n" +
+                "smile\n" +
                 "standing\n" +
-                "sunglasses"); //                           end portrait
+                "sunglasses\n" +
+                "wrinkle"); //                           end portrait
         featureList.add("black and white\n" + //            start sepia
                 "downtown\n" +
                 "fixed link\n" +

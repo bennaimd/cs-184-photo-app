@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
     public void showPrompt(){
         new AlertDialog.Builder(MainActivity.this)
                 .setTitle(R.string.dialog_select_prompt)
-                .setMessage("\n")
+                .setMessage("")
                 .setPositiveButton(R.string.dialog_select_gallery, (dialog, which) -> startGalleryChooser())
                 .setNegativeButton(R.string.dialog_select_camera, (dialog, which) -> startCamera())
                 .setCancelable(false)

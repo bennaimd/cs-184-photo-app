@@ -304,7 +304,7 @@ public class FilterFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 // minimum contrast is .5
-                Float contrast = (float) (.0f + (i+50) * .01f);
+                Float contrast = (float) ((i+50) * .01f);
                 Float displayNum = (contrast - 1.5f) * 100;
                 DecimalFormat d = new DecimalFormat("0");
                 contrastLabel.setText("Contrast: "+d.format(displayNum));

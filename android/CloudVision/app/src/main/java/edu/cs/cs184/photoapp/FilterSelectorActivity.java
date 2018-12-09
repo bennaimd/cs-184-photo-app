@@ -142,10 +142,13 @@ public class FilterSelectorActivity extends AppCompatActivity {
         MainActivity.scaleBitmapDown( MainActivity.myPhoto,1000).compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] byteArray = stream.toByteArray();
 
+
+        //TODO: conditional statement based on whether it displays applicable filters or all filters (customFilters=applicable, currentArray=all)
+        //TODO: Add button on no filter page to show all filters
         ArrayList<CustomFilter> customFilters = CustomFilters.getFilters(MainActivity.features, MainActivity.percentCertainties, this.getApplicationContext());
 
         ArrayList<Pair<Filter,String>> currentArray = CustomFilters.getFiltersInOrder(MainActivity.percentCertainties,MainActivity.features,this.getApplicationContext());
-        Toast.makeText(getContext(),"size: " + currentArray.size(), Toast.LENGTH_LONG).show();
+        //Toast.makeText(getContext(),"size: " + currentArray.size(), Toast.LENGTH_LONG).show();
         for(int i=0; i<customFilters.size();i++){
 
             FilterFragment currentFrag = FilterFragment.newInstance(byteArray,i,customFilters.get(i).getFilterName(), customFilters.get(i).getFeatures(), customFilters.get(i).getCerts());
