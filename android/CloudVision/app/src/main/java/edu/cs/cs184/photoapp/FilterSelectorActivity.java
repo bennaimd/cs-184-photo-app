@@ -1,24 +1,36 @@
 package edu.cs.cs184.photoapp;
 
 
+import android.Manifest;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.zomato.photofilters.imageprocessors.Filter;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class FilterSelectorActivity extends AppCompatActivity {
 
@@ -214,6 +226,9 @@ public class FilterSelectorActivity extends AppCompatActivity {
         state.putInt("tab",mTabLayout.getSelectedTabPosition());
         state.putBundle("main",state);
     }
+
+    //storage
+
 
 
 

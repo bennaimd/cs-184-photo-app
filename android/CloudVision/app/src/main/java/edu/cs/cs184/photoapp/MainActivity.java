@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int GALLERY_IMAGE_REQUEST = 1;
     public static final int CAMERA_PERMISSIONS_REQUEST = 2;
     public static final int CAMERA_IMAGE_REQUEST = 3;
+    public static final int WRITE_EXTERNAL_STORAGE_REQUEST = 4;
 
     public static Bitmap myPhoto;
     public static Uri myUri;
