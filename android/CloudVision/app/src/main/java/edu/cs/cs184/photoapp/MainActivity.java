@@ -320,6 +320,10 @@ public class MainActivity extends AppCompatActivity {
             MainActivity activity = mActivityWeakReference.get();
             if (activity != null && !activity.isFinishing()) {
                 Intent intent = new Intent(activity, FilterSelectorActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putBoolean("all", false);
+                bundle.putBoolean("featDialog", false);
+                intent.putExtras(bundle);
                 Log.e("data",result);
                 mProgressDialog.dismiss();
 

@@ -20,6 +20,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -92,6 +94,8 @@ public class FilterFragment extends Fragment {
 
     private ImageView imageView;
 
+    private CheckBox showAllBox;
+
     // Required empty public constructor
     public FilterFragment() {
     }
@@ -150,15 +154,17 @@ public class FilterFragment extends Fragment {
         originalBitmap = Bitmap.createBitmap(10,10,Bitmap.Config.ARGB_8888);
 
 
+
+
         if (getArguments() != null) {
             Log.e("as", "arguments aren't null");
             inBitmap = getArguments().getByteArray(ARG_PARAM1);
             inIndex = getArguments().getInt(ARG_PARAM2);
             inFilterName = getArguments().getString(ARG_PARAM3);
             Object[] rawFeat = (Object[]) getArguments().getSerializable("feats");
-            features = Arrays.copyOf(rawFeat, rawFeat.length, String[].class);
+            if(rawFeat != null) features = Arrays.copyOf(rawFeat, rawFeat.length, String[].class);
             Object[] rawCert = (Object[]) getArguments().getSerializable("certs");
-            certainties = Arrays.copyOf(rawCert, rawCert.length, Double[].class);
+            if(rawCert != null) certainties = Arrays.copyOf(rawCert, rawCert.length, Double[].class);
 
 
             // try to decode the bitmap passed.
@@ -176,15 +182,12 @@ public class FilterFragment extends Fragment {
             }
 
 
-            // TODO: make a dialog with the features detected on info clicked
+            // done: make a dialog with the features detected on info clicked
 
 
 
 
         }
-
-        // TODO: potentially make these into an array, or something else more elegant (only if someone wants to put in the effort)
-
 
         // TODO: Don't actually do anything for brightness (making sure there isn't confusion)
         final SeekBar brightnessSlider = (SeekBar) getView().findViewById(R.id.seekBar1);
@@ -192,8 +195,6 @@ public class FilterFragment extends Fragment {
         brightnessLabel.setText("Brightness: 0");
         brightnessSlider.setMax(200);
         brightnessSlider.setProgress(100);
-
-
 
 
         final SeekBar contrastSlider = (SeekBar) getView().findViewById(R.id.seekBar2);
@@ -212,9 +213,26 @@ public class FilterFragment extends Fragment {
         final Button infoButton = (Button) getView().findViewById(R.id.button);
         final Button button1 = (Button) getView().findViewById(R.id.button1);
         final Button ResetButton = (Button) getView().findViewById(R.id.button2);
-        if(features.length < 1) infoButton.setVisibility(View.INVISIBLE);
+        if(features == null) infoButton.setVisibility(View.INVISIBLE);
+        else if(features.length < 1) infoButton.setVisibility(View.INVISIBLE);
         final ImageButton saveButton = (ImageButton) getView().findViewById(R.id.saveButton);
 
+        showAllBox = view.findViewById(R.id.showAllBox);
+        showAllBox.setChecked(FilterSelectorActivity.getShowAll());
+        if(inFilterName.equals("No Filter")){
+            showAllBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    FilterSelectorActivity.setShowAllFilters(b);
+
+
+                }
+            });
+
+        }
+        else{
+            showAllBox.setVisibility(View.INVISIBLE);
+        }
 
 
         // removed automatic filter from user edits, this way the user edits will edit the filtered picture instead of blending the edits
@@ -478,5 +496,7 @@ public class FilterFragment extends Fragment {
         for(ArrayList<SubFilter> a: filterMap.values()) result += a.size();
         return  result;
     }
+
+
 
 }

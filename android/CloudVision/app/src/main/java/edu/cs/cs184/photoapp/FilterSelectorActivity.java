@@ -3,6 +3,7 @@ package edu.cs.cs184.photoapp;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
@@ -38,6 +39,9 @@ public class FilterSelectorActivity extends AppCompatActivity {
 
     private static Context mContext;
 
+    private static boolean showAllFilters = false;
+    private static boolean featDialogShown = true;
+
     public static Context getContext(){
         return mContext;
     }
@@ -46,21 +50,25 @@ public class FilterSelectorActivity extends AppCompatActivity {
     // Daniel: adapted from my homework 3 implementation
 
     public static CustomFragmentsPagerAdapter customFragmentsPagerAdapter;
-    private ViewPager mViewPager;
+    private static ViewPager mViewPager;
     private TabLayout mTabLayout;
     private ArrayList<FilterFragment> mFilterFragments;
 
     public static int getDisplayWidth= 1;
     public static int getDisplayHeight =1;
+    private static FilterSelectorActivity activity;
+
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null) {
-            savedInstanceState.getBundle("main");
+
+            //savedInstanceState.getBundle("main");
+            showAllFilters = savedInstanceState.getBoolean("all");
+            featDialogShown = savedInstanceState.getBoolean("featDialog");
 
             mViewPager.setCurrentItem(savedInstanceState.getInt("current", 1));
             mTabLayout.getTabAt(savedInstanceState.getInt("tab",1)).select();
-        }
+
     }
 
 
@@ -74,6 +82,20 @@ public class FilterSelectorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_filter_selector);
         updateWidth(this);
         mContext = getApplicationContext();
+        activity = this;
+
+        Intent intent = getIntent();
+
+        if(savedInstanceState == null){
+            Log.d("filterselect", "bundle not null");
+            Bundle bundle = intent.getExtras();
+            showAllFilters = bundle.getBoolean("all");
+            featDialogShown = bundle.getBoolean("featDialog");
+        }
+        else{
+            showAllFilters = savedInstanceState.getBoolean("all");
+            featDialogShown = savedInstanceState.getBoolean("featDialog");
+        }
 
         customFragmentsPagerAdapter = new CustomFragmentsPagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.fragmentsPager);
@@ -131,13 +153,15 @@ public class FilterSelectorActivity extends AppCompatActivity {
 
 
     private void showFeatureDialog() {
+        if(!featDialogShown) {
+            FragmentManager fm = getSupportFragmentManager();
 
-        FragmentManager fm = getSupportFragmentManager();
+            FeatureDialog featureList = FeatureDialog.newInstance("Some Title");
+            featureList.addData(MainActivity.features, MainActivity.percentCertainties);
 
-        FeatureDialog featureList = FeatureDialog.newInstance("Some Title");
-        featureList.addData(MainActivity.features, MainActivity.percentCertainties);
-
-        featureList.show(fm, "fragment_edit_name");
+            featureList.show(fm, "fragment_edit_name");
+            featDialogShown = true;
+        }
 
     }
 
@@ -157,26 +181,22 @@ public class FilterSelectorActivity extends AppCompatActivity {
 
         //TODO: conditional statement based on whether it displays applicable filters or all filters (customFilters=applicable, currentArray=all)
         //TODO: Add button on no filter page to show all filters
-        ArrayList<CustomFilter> customFilters = CustomFilters.getFilters(MainActivity.features, MainActivity.percentCertainties, this.getApplicationContext());
-
-        ArrayList<Pair<Filter,String>> currentArray = CustomFilters.getFiltersInOrder(MainActivity.percentCertainties,MainActivity.features,this.getApplicationContext());
-        //Toast.makeText(getContext(),"size: " + currentArray.size(), Toast.LENGTH_LONG).show();
-        for(int i=0; i<customFilters.size();i++){
-
-            FilterFragment currentFrag = FilterFragment.newInstance(byteArray,i,customFilters.get(i).getFilterName(), customFilters.get(i).getFeatures(), customFilters.get(i).getCerts());
-            mFilterFragments.add(currentFrag);
-            pagerAdapter.addFragment(currentFrag);
-
-
-            mTabLayout.addTab(mTabLayout.newTab().setText(customFilters.get(i).getFilterName()));
-
-            // fixed: set new ontablistener to select the right fragment
-            // solution: blank tab in layout was pushing them all forward by 1, removed blank tab
+        if(showAllFilters){
+            showAllFilters(pager);
 
         }
-        pager.setAdapter(pagerAdapter);
+        else{
+            showApplicableFilters(pager);
+        }
+
+
+
+
+
+
 
     }
+
 
 
 
@@ -191,6 +211,15 @@ public class FilterSelectorActivity extends AppCompatActivity {
         getDisplayWidth = m.widthPixels;
         getDisplayHeight = m.heightPixels;
     }
+
+    public static void setShowAllFilters(boolean bool){
+        showAllFilters = bool;
+        activity.setupViewPager(mViewPager);
+
+
+    }
+
+    public static boolean getShowAll() { return showAllFilters; }
 
     public static int getWidth()
     {
@@ -225,10 +254,83 @@ public class FilterSelectorActivity extends AppCompatActivity {
         state.putInt("current",mViewPager.getCurrentItem());
         state.putInt("tab",mTabLayout.getSelectedTabPosition());
         state.putBundle("main",state);
+        state.putBoolean("all", showAllFilters);
+        state.putBoolean("featDialog", featDialogShown);
     }
 
-    //storage
 
+
+public void showAllFilters(ViewPager pager){
+    CustomFragmentsPagerAdapter pagerAdapter = new CustomFragmentsPagerAdapter(getSupportFragmentManager());
+        /*todo: generate the list of filters to apply, then apply them on each instance of a fragment.
+        / todo: We could also generate an array of them right after the result is received in main activity.*/
+
+    // Daniel: very roughly adapted from my hw 4 implementation.
+    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+
+    // Don't want to send a full res bitmap because of memory and processing cost
+    MainActivity.scaleBitmapDown( MainActivity.myPhoto,1000).compress(Bitmap.CompressFormat.PNG, 100, stream);
+    byte[] byteArray = stream.toByteArray();
+    mFilterFragments = new ArrayList<>();
+    mTabLayout.removeAllTabs();
+
+    //TODO: conditional statement based on whether it displays applicable filters or all filters (customFilters=applicable, currentArray=all)
+    //TODO: Add button on no filter page to show all filters
+        ArrayList<Pair<Filter,String>> currentArray = CustomFilters.getFiltersInOrder(MainActivity.percentCertainties,MainActivity.features,this.getApplicationContext());
+
+        for(int i=0; i<currentArray.size();i++){
+
+            FilterFragment currentFrag = FilterFragment.newInstance(byteArray,i,currentArray.get(i).second,null, null);
+            mFilterFragments.add(currentFrag);
+            pagerAdapter.addFragment(currentFrag);
+
+
+            mTabLayout.addTab(mTabLayout.newTab().setText(currentArray.get(i).second));
+
+            // fixed: set new ontablistener to select the right fragment
+            // solution: blank tab in layout was pushing them all forward by 1, removed blank tab
+
+        }
+    mTabLayout.getTabAt(0).select();
+    pager.setAdapter(pagerAdapter);
+}
+
+public void showApplicableFilters(ViewPager pager){
+    CustomFragmentsPagerAdapter pagerAdapter = new CustomFragmentsPagerAdapter(getSupportFragmentManager());
+        /*todo: generate the list of filters to apply, then apply them on each instance of a fragment.
+        / todo: We could also generate an array of them right after the result is received in main activity.*/
+
+    // Daniel: very roughly adapted from my hw 4 implementation.
+    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+
+    // Don't want to send a full res bitmap because of memory and processing cost
+    MainActivity.scaleBitmapDown( MainActivity.myPhoto,1000).compress(Bitmap.CompressFormat.PNG, 100, stream);
+    byte[] byteArray = stream.toByteArray();
+    mFilterFragments = new ArrayList<>();
+    mTabLayout.removeAllTabs();
+
+    //TODO: conditional statement based on whether it displays applicable filters or all filters (customFilters=applicable, currentArray=all)
+    //TODO: Add button on no filter page to show all filters
+    ArrayList<CustomFilter> customFilters = CustomFilters.getFilters(MainActivity.features, MainActivity.percentCertainties, this.getApplicationContext());
+
+    for(int i=0; i<customFilters.size();i++){
+
+        FilterFragment currentFrag = FilterFragment.newInstance(byteArray,i,customFilters.get(i).getFilterName(), customFilters.get(i).getFeatures(), customFilters.get(i).getCerts());
+        mFilterFragments.add(currentFrag);
+        pagerAdapter.addFragment(currentFrag);
+        Log.d("filtersort", customFilters.size()+"");
+
+
+        mTabLayout.addTab(mTabLayout.newTab().setText(customFilters.get(i).getFilterName()));
+
+        // fixed: set new ontablistener to select the right fragment
+        // solution: blank tab in layout was pushing them all forward by 1, removed blank tab
+
+    }
+    mTabLayout.getTabAt(0).select();
+
+    pager.setAdapter(pagerAdapter);
+}
 
 
 
