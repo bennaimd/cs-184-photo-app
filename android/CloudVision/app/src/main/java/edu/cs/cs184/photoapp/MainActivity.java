@@ -30,7 +30,10 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -106,6 +109,8 @@ public class MainActivity extends AppCompatActivity {
 
         //showPrompt();
     }
+
+
 
     public void showPrompt(){
         new AlertDialog.Builder(MainActivity.this)

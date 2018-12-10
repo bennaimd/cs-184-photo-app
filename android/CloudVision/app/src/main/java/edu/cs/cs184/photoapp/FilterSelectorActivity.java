@@ -69,7 +69,7 @@ public class FilterSelectorActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // todo: create a dialogfragment that displays a nicely formatted list of the features
+        // done: create a dialogfragment that displays a nicely formatted list of the features
 
         setContentView(R.layout.activity_filter_selector);
         updateWidth(this);
