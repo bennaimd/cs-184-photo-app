@@ -77,8 +77,8 @@ public class FilterFragment extends Fragment {
 
     // determines reasonable resolutions for the mipmap in order to maximize fidelty and framerate
     final int MIPMAP_MAX_DIMENSION = 1000;
-    final int MIPMAP_MIN_DIMENSION = 350;
-    final int MIPMAP_STEP = 150;
+    final int MIPMAP_MIN_DIMENSION = 388;
+    final int MIPMAP_STEP = 166;
 
     private Bitmap originalBitmap;
     private Bitmap mipMap;
@@ -443,7 +443,7 @@ public class FilterFragment extends Fragment {
 
 
     private void updateMipMap(){
-        mipMap = scaleBitmapDown(originalBitmap,Math.max( MIPMAP_MAX_DIMENSION-MIPMAP_STEP*getMapSize(),MIPMAP_MIN_DIMENSION));
+        mipMap = scaleBitmapDown(originalBitmap, Math.max(MIPMAP_MAX_DIMENSION-MIPMAP_STEP*getMapSize(),MIPMAP_MIN_DIMENSION));
     }
 
 
@@ -474,6 +474,7 @@ public class FilterFragment extends Fragment {
 
     private int getMapSize(){
         int result = 0;
+        for(SubFilter s: autoFilter.getSubFilters()) result++;
         for(ArrayList<SubFilter> a: filterMap.values()) result += a.size();
         return  result;
     }
