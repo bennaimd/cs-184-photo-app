@@ -1,6 +1,5 @@
 package edu.cs.cs184.photoapp;
 
-
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
@@ -33,9 +32,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+// FilterSelectorAcitivity: provides an activity with tabs and some helpers for the filter fragments  
 public class FilterSelectorActivity extends AppCompatActivity {
-
-    // TODO: sort filters, maybe display some info, mark the suggested ones
 
     private static Context mContext;
 
@@ -48,7 +46,6 @@ public class FilterSelectorActivity extends AppCompatActivity {
 
 
     // Daniel: adapted from my homework 3 implementation
-
     public static CustomFragmentsPagerAdapter customFragmentsPagerAdapter;
     private static ViewPager mViewPager;
     private TabLayout mTabLayout;
@@ -68,17 +65,12 @@ public class FilterSelectorActivity extends AppCompatActivity {
 
             mViewPager.setCurrentItem(savedInstanceState.getInt("current", 1));
             mTabLayout.getTabAt(savedInstanceState.getInt("tab",1)).select();
-
     }
-
-
+    
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // done: create a dialogfragment that displays a nicely formatted list of the features
-
         setContentView(R.layout.activity_filter_selector);
         updateWidth(this);
         mContext = getApplicationContext();
@@ -103,22 +95,16 @@ public class FilterSelectorActivity extends AppCompatActivity {
         mTabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
         mTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
         
-        // done: fix tab selection listener - it currently causes the app to reopen?
-        // solution : it was trying to set the icon color and there was no icon, removed line
         mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-
                 mViewPager.setCurrentItem(tab.getPosition());
                 tab.select();
-
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                //tab.select();
-
-
+                
             }
 
             @Override
@@ -168,8 +154,6 @@ public class FilterSelectorActivity extends AppCompatActivity {
     private void setupViewPager(ViewPager pager) {
         CustomFragmentsPagerAdapter pagerAdapter = new CustomFragmentsPagerAdapter(getSupportFragmentManager());
         mFilterFragments = new ArrayList<>();
-        /*todo: generate the list of filters to apply, then apply them on each instance of a fragment.
-        / todo: We could also generate an array of them right after the result is received in main activity.*/
 
         // Daniel: very roughly adapted from my hw 4 implementation.
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -178,9 +162,6 @@ public class FilterSelectorActivity extends AppCompatActivity {
         MainActivity.scaleBitmapDown( MainActivity.myPhoto,1000).compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] byteArray = stream.toByteArray();
 
-
-        //TODO: conditional statement based on whether it displays applicable filters or all filters (customFilters=applicable, currentArray=all)
-        //TODO: Add button on no filter page to show all filters
         if(showAllFilters){
             showAllFilters(pager);
 
@@ -188,19 +169,9 @@ public class FilterSelectorActivity extends AppCompatActivity {
         else{
             showApplicableFilters(pager);
         }
-
-
-
-
-
-
-
     }
 
-
-
-
-
+    
     public void updateWidth(Context context)
     {
         final WindowManager w = (WindowManager) context
@@ -211,42 +182,36 @@ public class FilterSelectorActivity extends AppCompatActivity {
         getDisplayWidth = m.widthPixels;
         getDisplayHeight = m.heightPixels;
     }
+    
 
     public static void setShowAllFilters(boolean bool){
         showAllFilters = bool;
         activity.setupViewPager(mViewPager);
-
-
     }
+    
 
-    public static boolean getShowAll() { return showAllFilters; }
+    public static boolean getShowAll() { 
+        return showAllFilters; 
+    }
+    
 
-    public static int getWidth()
-    {
+    public static int getWidth() {
         return getDisplayWidth;
     }
-    public static int getHeight(){return getDisplayHeight;}
+    
+    
+    public static int getHeight(){
+        return getDisplayHeight;
+    }
 
-    // https://stackoverflow.com/questions/23902892/how-to-programmatically-trigger-the-touch-event-in-android for no button //todo: maybe come up with a less sketchy way to dismiss the dialog from its no button
-    // otherwise the back button takes you back to the main activity and doesn't let you do anything
-    /*@Override
-    public void onBackPressed(){
-        new AlertDialog.Builder(FilterSelectorActivity.this)
-                .setTitle(R.string.dialog_quit_prompt)
-                .setMessage("\n")
-                .setPositiveButton("Yes", (dialog, which) -> this.finishAffinity())
-                .setNegativeButton("No",(dialog,which)-> MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis()+10,MotionEvent.ACTION_UP,0f,0f,0))
-                .setCancelable(true)
-                .create().show();
-
-    }*/
-
+    
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         setContentView(R.layout.activity_main);
         updateWidth(this);
     }
+    
 
     @Override
     public void onSaveInstanceState(Bundle state) {
@@ -259,13 +224,9 @@ public class FilterSelectorActivity extends AppCompatActivity {
     }
 
 
-
 public void showAllFilters(ViewPager pager){
-    CustomFragmentsPagerAdapter pagerAdapter = new CustomFragmentsPagerAdapter(getSupportFragmentManager());
-        /*todo: generate the list of filters to apply, then apply them on each instance of a fragment.
-        / todo: We could also generate an array of them right after the result is received in main activity.*/
-
     // Daniel: very roughly adapted from my hw 4 implementation.
+    CustomFragmentsPagerAdapter pagerAdapter = new CustomFragmentsPagerAdapter(getSupportFragmentManager());
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
     // Don't want to send a full res bitmap because of memory and processing cost
@@ -273,33 +234,24 @@ public void showAllFilters(ViewPager pager){
     byte[] byteArray = stream.toByteArray();
     mFilterFragments = new ArrayList<>();
     mTabLayout.removeAllTabs();
+    ArrayList<Pair<Filter,String>> currentArray = CustomFilters.getFiltersInOrder(MainActivity.percentCertainties,MainActivity.features,this.getApplicationContext());  
+    
+    for(int i=0; i<currentArray.size();i++){
+        FilterFragment currentFrag = FilterFragment.newInstance(byteArray,i,currentArray.get(i).second,null, null);
+        mFilterFragments.add(currentFrag);
+        pagerAdapter.addFragment(currentFrag);
 
-    //TODO: conditional statement based on whether it displays applicable filters or all filters (customFilters=applicable, currentArray=all)
-    //TODO: Add button on no filter page to show all filters
-        ArrayList<Pair<Filter,String>> currentArray = CustomFilters.getFiltersInOrder(MainActivity.percentCertainties,MainActivity.features,this.getApplicationContext());
-
-        for(int i=0; i<currentArray.size();i++){
-
-            FilterFragment currentFrag = FilterFragment.newInstance(byteArray,i,currentArray.get(i).second,null, null);
-            mFilterFragments.add(currentFrag);
-            pagerAdapter.addFragment(currentFrag);
-
-
-            mTabLayout.addTab(mTabLayout.newTab().setText(currentArray.get(i).second));
-
-            // fixed: set new ontablistener to select the right fragment
-            // solution: blank tab in layout was pushing them all forward by 1, removed blank tab
-
+        mTabLayout.addTab(mTabLayout.newTab().setText(currentArray.get(i).second));
         }
     mTabLayout.getTabAt(0).select();
     pager.setAdapter(pagerAdapter);
 }
 
+    
+// displays all of the filters that are applicable
 public void showApplicableFilters(ViewPager pager){
     CustomFragmentsPagerAdapter pagerAdapter = new CustomFragmentsPagerAdapter(getSupportFragmentManager());
-        /*todo: generate the list of filters to apply, then apply them on each instance of a fragment.
-        / todo: We could also generate an array of them right after the result is received in main activity.*/
-
+    
     // Daniel: very roughly adapted from my hw 4 implementation.
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
@@ -309,31 +261,18 @@ public void showApplicableFilters(ViewPager pager){
     mFilterFragments = new ArrayList<>();
     mTabLayout.removeAllTabs();
 
-    //TODO: conditional statement based on whether it displays applicable filters or all filters (customFilters=applicable, currentArray=all)
-    //TODO: Add button on no filter page to show all filters
     ArrayList<CustomFilter> customFilters = CustomFilters.getFilters(MainActivity.features, MainActivity.percentCertainties, this.getApplicationContext());
-
+    
     for(int i=0; i<customFilters.size();i++){
-
         FilterFragment currentFrag = FilterFragment.newInstance(byteArray,i,customFilters.get(i).getFilterName(), customFilters.get(i).getFeatures(), customFilters.get(i).getCerts());
         mFilterFragments.add(currentFrag);
         pagerAdapter.addFragment(currentFrag);
         Log.d("filtersort", customFilters.size()+"");
-
-
         mTabLayout.addTab(mTabLayout.newTab().setText(customFilters.get(i).getFilterName()));
-
-        // fixed: set new ontablistener to select the right fragment
-        // solution: blank tab in layout was pushing them all forward by 1, removed blank tab
-
     }
     mTabLayout.getTabAt(0).select();
-
     pager.setAdapter(pagerAdapter);
 }
-
-
-
 
 }
 
