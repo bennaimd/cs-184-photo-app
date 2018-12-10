@@ -94,12 +94,11 @@ public class MainActivity extends AppCompatActivity {
     private ProgressDialog mProgressDialog;
     private TextView statusText;
 
+    // loads zomato filter library
     static {
         System.loadLibrary("NativeImageProcessor");
-
     }
-
-    // TODO: make the alert show again if the back button is pressed during gallery or camera
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,11 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
         statusText = findViewById(R.id.image_details);
         PermissionUtils.requestPermission(this, WRITE_EXTERNAL_STORAGE_REQUEST, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        //showPrompt();
     }
-
-
 
     public void showPrompt(){
         new AlertDialog.Builder(MainActivity.this)
@@ -124,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
                 .create().show();
 
     }
-
 
     public void startGalleryChooser() {
         if (PermissionUtils.requestPermission(this, GALLERY_PERMISSIONS_REQUEST, Manifest.permission.READ_EXTERNAL_STORAGE)) {
@@ -165,7 +159,6 @@ public class MainActivity extends AppCompatActivity {
             Uri photoUri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", getCameraFile());
             uploadImage(photoUri);
         }
-
         statusText.setClickable(false);
     }
 
@@ -198,9 +191,7 @@ public class MainActivity extends AppCompatActivity {
                 myUri = uri;
                 myPhoto = bitmap;
 
-
                 // from https://stackoverflow.com/questions/35079083/android-loading-circle-spinner-between-two-activity
-
                 mProgressDialog = new ProgressDialog(MainActivity.this);
                 mProgressDialog.setTitle(R.string.loading_message);
                 mProgressDialog.setIndeterminate(false);
@@ -318,23 +309,19 @@ public class MainActivity extends AppCompatActivity {
          */
         protected void onPostExecute(String result) {
             MainActivity activity = mActivityWeakReference.get();
+            
             if (activity != null && !activity.isFinishing()) {
                 Intent intent = new Intent(activity, FilterSelectorActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putBoolean("all", false);
                 bundle.putBoolean("featDialog", false);
                 intent.putExtras(bundle);
-                Log.e("data",result);
+                Log.v("data",result);
                 mProgressDialog.dismiss();
 
                 storeResults(result);
-
                 startActivity(intent);
                 statusText.setText(getResources().getString(R.string.select_text));
-
-
-
-
             }
         }
     }
@@ -370,6 +357,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, true);
     }
+    
 
     private static String convertResponseToString(BatchAnnotateImagesResponse response) {
         StringBuilder message = new StringBuilder();
@@ -387,11 +375,8 @@ public class MainActivity extends AppCompatActivity {
         return message.toString();
     }
 
-
-
+    // splits results, which were in the form float: string, to a string array
     private void storeResults(String response){
-
-        //splits results, which were in the form float: string, to a string array
         String[] splitResultsArray = (String[])response.split(": ");
         ArrayList<String> splitResults = new ArrayList<>();
 
@@ -404,7 +389,7 @@ public class MainActivity extends AppCompatActivity {
         percentCertainties = new ArrayList<>();
 
         for(int i=0; i<splitResults.size(); i++){
-            //even results are strings, odd results are features.
+            // even results are strings, odd results are features.
             Log.e("res","result["+i+"]: "+splitResults.get(i));
             if(i%2==0) if(Double.parseDouble( splitResults.get(i))>=MIN_CERTAINTY) percentCertainties.add(100.0*Double.parseDouble(splitResults.get(i))); else i++;
             else features.add(splitResults.get(i));
@@ -412,24 +397,16 @@ public class MainActivity extends AppCompatActivity {
 
         if(features.size()!=percentCertainties.size()){Toast.makeText(this,"Error receiving response \uD83D\uDE22",Toast.LENGTH_SHORT).show(); throw new RuntimeException("Exception: malformed response");}
 
-
         if(features.size()==0) {
             features.add(splitResults.get(0));
             percentCertainties.add(Double.parseDouble( splitResults.get(1)));
             Toast.makeText(this, "Your image didn't have any good matches, but here's the best guess.", Toast.LENGTH_SHORT).show();
         }
-
-
-        //todo: choose and/or generate filters, apply them to the bitmap, and store them in an array
-
-
-
-        Log.e("split","features: " + features);
-        Log.e("split","pcts: " + percentCertainties);
-
-
+        Log.v("split","features: " + features);
+        Log.v("split","pcts: " + percentCertainties);
     }
 
+    
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if(event.getAction()==MotionEvent.ACTION_UP)
