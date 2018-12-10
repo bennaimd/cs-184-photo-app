@@ -248,8 +248,13 @@ public class FilterFragment extends Fragment {
                             if(savedImageName.equals(""))
                                 savedImageName = "EyePhoto_" + date.format(cal);
                             cachedBitmap =  ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-                            String url = StorageHelper.insertImage(getActivity().getContentResolver(), cachedBitmap, savedImageName);
-                            Toast.makeText(getContext(), "Image:" + savedImageName + " saved to Gallery", Toast.LENGTH_SHORT).show();
+                            String url = StorageHelper.insertImage(getActivity().getContentResolver(), cachedBitmap, savedImageName + ".jpg");
+                            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                            File f = new File(url);
+                            Uri contentUri = Uri.fromFile(f);
+                            mediaScanIntent.setData(contentUri);
+                            getActivity().sendBroadcast(mediaScanIntent);
+                            Toast.makeText(getContext(),"Image Saved", Toast.LENGTH_SHORT).show();
 
                         }
                     });
@@ -262,14 +267,6 @@ public class FilterFragment extends Fragment {
 
                     builder.show();
 
-                    //shows image in gallery
-                    /*
-                    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                    File f = new File(url);
-                    Uri contentUri = Uri.fromFile(f);
-                    mediaScanIntent.setData(contentUri);
-                    getActivity().sendBroadcast(mediaScanIntent);
-                    */
                 }
 
                 else
