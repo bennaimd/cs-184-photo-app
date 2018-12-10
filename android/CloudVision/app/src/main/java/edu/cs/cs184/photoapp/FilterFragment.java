@@ -237,7 +237,7 @@ public class FilterFragment extends Fragment {
                     final EditText textName = new EditText(getContext());
                     DateFormat date = new SimpleDateFormat("dd-MM-yyy HH:mm:ss z");
                     Date cal = Calendar.getInstance().getTime();
-                    textName.setHint("PhotoApp_" + date.format(cal));
+                    textName.setHint("EyePhoto_" + date.format(cal));
                     textName.setInputType(InputType.TYPE_CLASS_TEXT);
                     builder.setView(textName);
                     builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
@@ -246,7 +246,7 @@ public class FilterFragment extends Fragment {
 
                             savedImageName = textName.getText().toString();
                             if(savedImageName.equals(""))
-                                savedImageName = "PhotoApp_" + date.format(cal);
+                                savedImageName = "EyePhoto_" + date.format(cal);
                             cachedBitmap =  ((BitmapDrawable) imageView.getDrawable()).getBitmap();
                             String url = StorageHelper.insertImage(getActivity().getContentResolver(), cachedBitmap, savedImageName);
                             Toast.makeText(getContext(), "Image:" + savedImageName + " saved to Gallery", Toast.LENGTH_SHORT).show();
