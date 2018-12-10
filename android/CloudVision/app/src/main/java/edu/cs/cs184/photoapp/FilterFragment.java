@@ -50,13 +50,10 @@ import java.util.Random;
 
 import static edu.cs.cs184.photoapp.MainActivity.scaleBitmapDown;
 
-
-// Filter fragment:
+// FilterFragment: A class to display one image with one applied filter, 
+// a set of sliders to tweak the filters as they desire, and to save the image
 
 public class FilterFragment extends Fragment {
-
-    // TODO: add save functionality
-    // TODO: create some interactable to view which feature(s) corresponded and what their percentages were.
 
     public static final String ARG_PARAM1 = "param1";
     public static final String ARG_PARAM2 = "param2";
@@ -100,19 +97,17 @@ public class FilterFragment extends Fragment {
     public FilterFragment() {
     }
 
+    // parse parameters
     public static FilterFragment newInstance(byte[] param1, int param2, String param3, Object[] feats, Object[] certs) {
         FilterFragment fragment = new FilterFragment();
         Filter test = new Filter();
         Bundle args = new Bundle();
+        
         args.putByteArray(ARG_PARAM1, param1);
         args.putInt(ARG_PARAM2, param2);
         args.putString(ARG_PARAM3, param3);
-
-        // TODO: clean this up
         args.putSerializable("feats", feats);
         args.putSerializable("certs", certs);
-
-
 
         fragment.setArguments(args);
         return fragment;
@@ -130,42 +125,27 @@ public class FilterFragment extends Fragment {
         super.onCreateView(inflater,container,savedInstanceState);
         setRetainInstance(true);
         super.onCreate(savedInstanceState);
-
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_filter, container, false);
-
-
         return view;
-
-
-
-
-
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState){
-
-
         super.onViewCreated(view,savedInstanceState);
-
         filterMap = new HashMap<>();
         imageView = (ImageView) getView().findViewById(R.id.imageView);
         originalBitmap = Bitmap.createBitmap(10,10,Bitmap.Config.ARGB_8888);
 
-
-
-
         if (getArguments() != null) {
-            Log.e("as", "arguments aren't null");
             inBitmap = getArguments().getByteArray(ARG_PARAM1);
             inIndex = getArguments().getInt(ARG_PARAM2);
             inFilterName = getArguments().getString(ARG_PARAM3);
+            
+            // determine whether the filter matches features
             Object[] rawFeat = (Object[]) getArguments().getSerializable("feats");
             if(rawFeat != null) features = Arrays.copyOf(rawFeat, rawFeat.length, String[].class);
             Object[] rawCert = (Object[]) getArguments().getSerializable("certs");
             if(rawCert != null) certainties = Arrays.copyOf(rawCert, rawCert.length, Double[].class);
-
 
             // try to decode the bitmap passed.
             // If it doesn't get passed successfully restart the app, because without the bitmap there is nothing to do.
@@ -180,16 +160,8 @@ public class FilterFragment extends Fragment {
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(i);
             }
-
-
-            // done: make a dialog with the features detected on info clicked
-
-
-
-
         }
 
-        // TODO: Don't actually do anything for brightness (making sure there isn't confusion)
         final SeekBar brightnessSlider = (SeekBar) getView().findViewById(R.id.seekBar1);
         final TextView brightnessLabel = (TextView) getView().findViewById(R.id.textView1);
         brightnessLabel.setText("Brightness: 0");
@@ -234,15 +206,9 @@ public class FilterFragment extends Fragment {
             showAllBox.setVisibility(View.INVISIBLE);
         }
 
-
-        // removed automatic filter from user edits, this way the user edits will edit the filtered picture instead of blending the edits
+        // retrieve the corresponding filter
         autoFilter = CustomFilters.getFilter(inFilterName,FilterSelectorActivity.getContext());
-
-        //addToFilterMap("myfilter",(ArrayList) mFilter.getSubFilters());
-        //final Filter mFilter = CustomFilters.getFilter(inFilterName,FilterSelectorActivity.getContext());
-
         imageView.setImageBitmap(getBitmap());
-
         updateMipMap();
         
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -250,7 +216,7 @@ public class FilterFragment extends Fragment {
             public void onClick(View view) {
 
                 if(StorageHelper.isExternalStorageWritable()){
-                    //choose filename
+                    // choose filename, with the current time and date as a default name
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     builder.setTitle("Save Image As");
                     final EditText textName = new EditText(getContext());
@@ -277,6 +243,7 @@ public class FilterFragment extends Fragment {
 
                         }
                     });
+                    
                     builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -298,7 +265,8 @@ public class FilterFragment extends Fragment {
         infoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create(); //Read Update
+                // Read Update
+                AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
                 if(features.length!=0) {
                     alertDialog.setTitle("Features Applicable to This Filter:");
                     String message = "";
@@ -319,23 +287,17 @@ public class FilterFragment extends Fragment {
             }
         });
 
-
+        // toggles the original bitmap so the user can compare their new image to the image they selected
         button1.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
 
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    //Bitmap currentBitmap = originalBitmap.copy( Bitmap.Config.ARGB_8888,true);
-                    //imageView.setImageBitmap(getFilter().processFilter(currentBitmap));
                     imageView.setImageBitmap(cachedBitmap);
                 }
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     cachedBitmap =  ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-
-                    imageView.setImageBitmap(originalBitmap);
-                    //cachedBitmap = getFilter().processFilter(getBitmap());
-
-                }
+                    imageView.setImageBitmap(originalBitmap);                }
                 return true;
             }
 
@@ -353,9 +315,7 @@ public class FilterFragment extends Fragment {
             }
         });
 
-
-
-
+        // calculate new subfilters from user input, correctly format the image text, place in the filter
         brightnessSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -364,8 +324,6 @@ public class FilterFragment extends Fragment {
                 brightnessLabel.setText("Brightness: " + brightness);
                 ArrayList<SubFilter> a = new ArrayList<>();
                 a.add(new BrightnessSubFilter(brightness));
-                //Filter f = new Filter();
-                //f.addSubFilter(a.get(0));
                 addToFilterMap("brightness",a);
                 imageView.setImageBitmap(getFilter().processFilter(getMipMap()));
             }
@@ -382,8 +340,6 @@ public class FilterFragment extends Fragment {
                 seekBar.setThumb(thumb);
                 updateMipMap();
                 imageView.setImageBitmap(getBitmap());
-
-
             }
         });
 
@@ -398,8 +354,6 @@ public class FilterFragment extends Fragment {
                 ArrayList<SubFilter> a = new ArrayList<>();
                 a.add(new ContrastSubFilter(contrast));
                 addToFilterMap("contrast", a);
-                //Filter f = new Filter();
-                //f.addSubFilter(a.get(0));
                 imageView.setImageBitmap(getFilter().processFilter(getMipMap()));
             }
 
@@ -425,7 +379,6 @@ public class FilterFragment extends Fragment {
         saturationSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-
                 Float saturation = (float)(.0f + i * .01f);
                 Float displayNum = (saturation - 1.0f) * 100;
                 DecimalFormat d = new DecimalFormat("0");
@@ -452,8 +405,6 @@ public class FilterFragment extends Fragment {
         });
 
 
-
-
     }
     private Bitmap getBitmap(){
         return getFilter().processFilter(originalBitmap.copy(Bitmap.Config.ARGB_8888,true));
@@ -470,6 +421,7 @@ public class FilterFragment extends Fragment {
         return mipMap.copy(Bitmap.Config.ARGB_8888,true);
     }
 
+    
     private void addToFilterMap(String s, ArrayList<SubFilter> a){
         filterMap.put(s, a);
     }
@@ -480,6 +432,7 @@ public class FilterFragment extends Fragment {
         filterMap.remove(s);
     }
 
+    
     private Filter getFilter() {
         Filter filters = new Filter();
         if(autoFilter != null){
@@ -490,13 +443,11 @@ public class FilterFragment extends Fragment {
         return filters;
     }
 
+    
     private int getMapSize(){
         int result = 0;
         for(SubFilter s: autoFilter.getSubFilters()) result++;
         for(ArrayList<SubFilter> a: filterMap.values()) result += a.size();
         return  result;
     }
-
-
-
 }
