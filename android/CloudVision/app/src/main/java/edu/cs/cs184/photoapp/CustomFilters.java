@@ -8,6 +8,7 @@ import android.util.Pair;
 import com.zomato.photofilters.geometry.Point;
 import com.zomato.photofilters.imageprocessors.Filter;
 import com.zomato.photofilters.imageprocessors.subfilters.BrightnessSubFilter;
+import com.zomato.photofilters.imageprocessors.subfilters.ColorOverlaySubFilter;
 import com.zomato.photofilters.imageprocessors.subfilters.ContrastSubFilter;
 import com.zomato.photofilters.imageprocessors.subfilters.SaturationSubFilter;
 import com.zomato.photofilters.imageprocessors.subfilters.ToneCurveSubFilter;
@@ -96,7 +97,7 @@ public class CustomFilters {
             else i++;
         }
         Log.d("filtersort", "end found at: "+i);
-        for(int j = matchingFilters.size()-1; j>max(i, 4); j--){
+        for(int j = matchingFilters.size()-1; j>i; j--){
             Log.d("filtersort", "Removing: "+matchingFilters.get(j).getFilterName());
             matchingFilters.remove(j);
 
@@ -196,7 +197,7 @@ public class CustomFilters {
         return filter;
     }
 
-    public static Filter getPolaroidFilter(){
+    public static Filter getPolaroidFilter(Context context){
         /**
          * polaroid filter: should look good for most objects,people,landscapes,buildings,misc
          */
@@ -229,6 +230,7 @@ public class CustomFilters {
         Filter filter = new Filter();
         filter.addSubFilter(new ToneCurveSubFilter(rgbKnots,null,greenKnots,null));
         filter.addSubFilter(new BrightnessSubFilter(20));
+        filter.addSubFilter(new VignetteSubFilter(context,30));
         filter.addSubFilter(new SaturationSubFilter(.78f));
         filter.addSubFilter(new ContrastSubFilter(.73f));
         filter.addSubFilter(new ToneCurveSubFilter(rgbKnots2,yellowKnots, yellowKnots, blueKnots ));
@@ -282,7 +284,8 @@ public class CustomFilters {
         filter.addSubFilter(new ToneCurveSubFilter(rgbKnots,redKnots,greenKnots,blueKnots));
         filter.addSubFilter(new SaturationSubFilter(1.3f));
         filter.addSubFilter(new VignetteSubFilter(context, 70));
-        filter.addSubFilter(new BrightnessSubFilter(10));
+        filter.addSubFilter(new BrightnessSubFilter(-20));
+        filter.addSubFilter(new ContrastSubFilter(1.3f));
         return  filter;
 
     }
@@ -413,18 +416,90 @@ public class CustomFilters {
         return filter;
     }
 
+    public static Filter getWinterWonderlandFilter() {
+        Point[] rgbKnots = new Point[2];
+        rgbKnots[0] = new Point(0,0);
+        rgbKnots[1] = new Point(240,255);
+        Point[] blueKnots = new Point[2];
+        blueKnots[0] = new Point(0,2);
+        blueKnots[1] = new Point(245,250);
+        Filter filter = new Filter();
+        filter.addSubFilter(new ToneCurveSubFilter(rgbKnots, null, null, blueKnots));
+        filter.addSubFilter(new SaturationSubFilter(0.7f));
+        filter.addSubFilter(new BrightnessSubFilter(10));
+        return filter;
+    }
+    public static Filter getRoseLensFilter() {
+        Filter filter = new Filter();
+        filter.addSubFilter(new ColorOverlaySubFilter(50,1f,0.1f,0f));
+        filter.addSubFilter(new BrightnessSubFilter(-10));
+        filter.addSubFilter(new ContrastSubFilter(0.7f));
+        return filter;
+    }
+    public static Filter getAutumnBreezeFilter() {
+        Filter filter = new Filter();
+        filter.addSubFilter(new ColorOverlaySubFilter(50,0.6f,0.4f,0.3f));
+        filter.addSubFilter(new BrightnessSubFilter(5));
+        filter.addSubFilter(new SaturationSubFilter(1.2f));
+        return filter;
+    }
+    public static Filter getAmaroFilter() {
+        Filter filter = new Filter();
+        filter.addSubFilter(new ColorOverlaySubFilter(40,0.1f,0.7f,0.2f));
+        filter.addSubFilter(new SaturationSubFilter(0.6f));
+        filter.addSubFilter(new ContrastSubFilter(0.6f));
+        return filter;
+    }
+    public static Filter getDesertFilter() {
+        Filter filter = new Filter();
+        filter.addSubFilter(new ColorOverlaySubFilter(50,0.6f,0.6f,0.1f));
+        filter.addSubFilter(new SaturationSubFilter(0.8f));
+        filter.addSubFilter(new BrightnessSubFilter(15));
+        filter.addSubFilter(new ContrastSubFilter(1.1f));
+        return filter;
+    }
+
     // TODO: add your filters to this array in alphabetical order.
     public static ArrayList<Filter> getAllFilters(Context context){
-        return new ArrayList<>( Arrays.asList( new Filter[]{getAweStruckVibeFilter(),getBlueMessFilter(),getBwFilter(),getLimeStutterFilter(),getMacroFilter(context),getNightVisionFilter(),getNightWhisperFilter(),getPolaroidFilter(),getPortraitFilter(context),getSepiaFilter(context),getStarLitFilter(),new Filter()}));
+        return new ArrayList<>( Arrays.asList( new Filter[]{getAmaroFilter(), getAutumnBreezeFilter(), getAweStruckVibeFilter(),getBlueMessFilter(),getDesertFilter(), getBwFilter(), getLimeStutterFilter(),getMacroFilter(context),getNightVisionFilter(),getNightWhisperFilter(),getPolaroidFilter(context),getPortraitFilter(context),getRoseLensFilter(), getSepiaFilter(context),getStarLitFilter(),getWinterWonderlandFilter(), new Filter()}));
     }
 
     // TODO: add your filters' names to this array in alphabetical order.
     public static ArrayList<String> getAllNames(){
-        return new ArrayList<>( Arrays.asList(new String[]{"Awestruck Vibe","Blue Mess","Graphite","Lime Stutter","Macro","Night Vision","Night Whisper","Polaroid","Portrait","Sepia","Star Lit","No Filter"}));
+        return new ArrayList<>( Arrays.asList(new String[]{"Amaro", "Autumn Breeze","Awestruck Vibe","Blue Mess","Desert", "Graphite","Lime Stutter","Macro","Night Vision","Night Whisper","Polaroid","Portrait","Rose Lens","Sepia","Star Lit", "Winter Wonderland","No Filter"}));
     }
 
     public static ArrayList<String> getAllFeatures(){
         ArrayList<String> featureList = new ArrayList<>();
+//Amaro
+        featureList.add("nature\n" +
+                "concert\n" +
+                "building\n" +
+                "car\n" +
+                "skyline\n" +
+                "skyscraper\n" +
+                "ice cream\n" +
+                "girl\n" +
+                "human\n" +
+                "sunglasses\n" +
+                "shoes\n" +
+                "flower\n" +
+                "fish\n" +
+                "ocean\n" +
+                "aquarium\n");
+//Autumn Breeze
+        featureList.add("nature\n" +
+                        "landscape\n" +
+                        "wilderness\n" +
+                        "wildlife\n" +
+                        "tree\n" +
+                        "forest\n" +
+                        "bush\n" +
+                        "leaves\n" +
+                        "park\n" +
+                        "campground\n" +
+                        "downtown\n");
+
         featureList.add("nature\n" + //                     start awestruck vibe
                 "\"nebula\n" +
                 "\"\n" +
@@ -515,6 +590,20 @@ public class CustomFilters {
                 "mammal\n" +
                 "marine biology\n" +
                 "marine invertebrates"); //                 end blue mess
+
+        //Desert
+        featureList.add("sand\n" +
+                "mountain\n" +
+                "beach\n" +
+                "motorcycle\n" +
+                "nature\n" +
+                "cabin\n" +
+                "landscape\n" +
+                "wilderness\n" +
+                "wildlife\n" +
+                "summer\n" +
+                "ecosystem\n" +
+                "dunes\n");
         featureList.add("architecture\n" + //               start graphite
                 "building\n" +
                 "downtown\n" +
@@ -759,10 +848,23 @@ public class CustomFilters {
                 "standing\n" +
                 "sunglasses\n" +
                 "wrinkle"); //                           end portrait
+
+        //Rose Lens
+        featureList.add("nature\n" +
+                "concert\n" +
+                "building\n" +
+                "car\n" +
+                "skyline\n" +
+                "skyscraper\n" +
+                "ice cream\n" +
+                "girl\n" +
+                "human\n" +
+                "sunglasses\n");
         featureList.add("black and white\n" + //            start sepia
                 "downtown\n" +
                 "fixed link\n" +
                 "highway\n" +
+                "vintage car\n"+
                 "monochrome\n" +
                 "monochrome photography\n" +
                 "photograph\n" +
@@ -821,6 +923,18 @@ public class CustomFilters {
                 "finger food\n" +
                 "fixed link\n" +
                 "flat white"); // end star lit
+        //Winter Wonderland
+        featureList.add("snow\n" +
+                "mountain\n" +
+                "skis\n" +
+                "snowboard\n" +
+                "nature\n" +
+                "cabin\n" +
+                "landscape\n" +
+                "wilderness\n" +
+                "wildlife\n" +
+                "winter\n" +
+                "ecosystem\n");
         featureList.add(""); // no filter
         return featureList;
     }

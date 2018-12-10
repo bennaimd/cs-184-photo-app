@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -247,7 +248,7 @@ public class FilterFragment extends Fragment {
                             savedImageName = textName.getText().toString();
                             if(savedImageName.equals(""))
                                 savedImageName = "EyePhoto_" + date.format(cal);
-                            cachedBitmap =  ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+                            cachedBitmap =  (Bitmap) getBitmap();
                             String url = StorageHelper.insertImage(getActivity().getContentResolver(), cachedBitmap, savedImageName + ".jpg");
                             Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                             File f = new File(url);
@@ -353,11 +354,14 @@ public class FilterFragment extends Fragment {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
+                Drawable thumb = getResources().getDrawable( R.drawable.custom_thumb2);
+                seekBar.setThumb(thumb);
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
+                Drawable thumb = getResources().getDrawable( R.drawable.custom_thumb);
+                seekBar.setThumb(thumb);
                 updateMipMap();
                 imageView.setImageBitmap(getBitmap());
 
@@ -383,12 +387,15 @@ public class FilterFragment extends Fragment {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
+                Drawable thumb = getResources().getDrawable( R.drawable.custom_thumb2);
+                seekBar.setThumb(thumb);
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar)
             {
+                Drawable thumb = getResources().getDrawable( R.drawable.custom_thumb);
+                seekBar.setThumb(thumb);
                 updateMipMap();
                 imageView.setImageBitmap(getBitmap());
 
@@ -413,11 +420,14 @@ public class FilterFragment extends Fragment {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
+                Drawable thumb = getResources().getDrawable( R.drawable.custom_thumb2);
+                seekBar.setThumb(thumb);
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
+                Drawable thumb = getResources().getDrawable( R.drawable.custom_thumb);
+                seekBar.setThumb(thumb);
                 updateMipMap();
                 imageView.setImageBitmap(getBitmap());
             }
