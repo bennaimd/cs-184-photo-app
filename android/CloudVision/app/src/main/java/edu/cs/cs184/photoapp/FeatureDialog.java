@@ -103,8 +103,13 @@ public class FeatureDialog extends DialogFragment {
 
 
     public void buildTable(){
-        for(int i=0; i<features.size(); i++) {
-            addRow(features.get(i), certainties.get(i));
+        if(features != null) {
+            for (int i = 0; i < features.size(); i++) {
+                addRow(features.get(i), certainties.get(i));
+            }
+        }
+        else{
+            dialog.dismiss();
         }
 
     }
