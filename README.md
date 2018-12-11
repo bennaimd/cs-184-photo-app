@@ -12,5 +12,5 @@ and generates filters created with [Zomato's AndroidPhotoFilters SDK](https://gi
 
 Authors: Daniel Ben-Naim, Jay Kiker, Joseph Kompella, Mitchell Lewis
 
-A user manual can be found at: <br>https://drive.google.com/open?id=1Cx1BddqtzkYo9Or2YM2VEhQvxiRELUZa
+A user manual can be found at https://drive.google.com/open?id=1Cx1BddqtzkYo9Or2YM2VEhQvxiRELUZa
 
