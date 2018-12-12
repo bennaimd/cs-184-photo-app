@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int CAMERA_IMAGE_REQUEST = 3;
     public static final int WRITE_EXTERNAL_STORAGE_REQUEST = 4;
 
+    public static Bitmap originalBitmap;
     public static Bitmap myPhoto;
     public static Uri myUri;
     public static ArrayList<String> features;
@@ -184,10 +185,8 @@ public class MainActivity extends AppCompatActivity {
         if (uri != null) {
             try {
                 // scale the image to save on bandwidth
-                Bitmap bitmap =
-                        scaleBitmapDown(
-                                MediaStore.Images.Media.getBitmap(getContentResolver(), uri),
-                                MAX_DIMENSION);
+                originalBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                Bitmap bitmap = scaleBitmapDown(originalBitmap, MAX_DIMENSION);
                 myUri = uri;
                 myPhoto = bitmap;
 
@@ -338,6 +337,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    protected static Bitmap getOriginalBitmap() {
+        return originalBitmap.copy(Bitmap.Config.ARGB_8888,true);
+    }
+
     protected static Bitmap scaleBitmapDown(Bitmap bitmap, int maxDimension) {
 
         int originalWidth = bitmap.getWidth();
@@ -413,5 +416,7 @@ public class MainActivity extends AppCompatActivity {
             showPrompt();
         return true;
     }
+
+
 
 }

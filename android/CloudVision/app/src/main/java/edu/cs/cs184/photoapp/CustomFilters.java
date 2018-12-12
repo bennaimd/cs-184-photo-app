@@ -728,7 +728,16 @@ public class CustomFilters {
                 "astronomy\n" +
                 "outer space\n" +
                 "universe\n" +
-                "backlighting"); //                         end night vision
+                "backlighting" +
+                "technology\n" +
+                "computer\n" +
+                "laptop\n" +
+                "technology\n" +
+                "electronic device\n" +
+                "computer hardware\n" +
+                "electronics\n" +
+                "software\n" +
+                "display device\n"); //                         end night vision
         featureList.add("vacation\n" + //                   start night whisper
                 "vegetable\n" +
                 "vegetarian food\n" +

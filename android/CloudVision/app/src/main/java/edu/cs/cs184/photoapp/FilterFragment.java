@@ -49,6 +49,8 @@ import java.util.Map;
 import java.util.Random;
 
 import static edu.cs.cs184.photoapp.MainActivity.scaleBitmapDown;
+import static edu.cs.cs184.photoapp.MainActivity.getOriginalBitmap;
+
 
 // FilterFragment: A class to display one image with one applied filter, 
 // a set of sliders to tweak the filters as they desire, and to save the image
@@ -232,8 +234,10 @@ public class FilterFragment extends Fragment {
                             savedImageName = textName.getText().toString();
                             if(savedImageName.equals(""))
                                 savedImageName = "EyePhoto_" + date.format(cal);
-                            cachedBitmap =  (Bitmap) getBitmap();
-                            String url = StorageHelper.insertImage(getActivity().getContentResolver(), cachedBitmap, savedImageName + ".jpg");
+                            //cachedBitmap =  (Bitmap) getBitmap();
+                            //String url = StorageHelper.insertImage(getActivity().getContentResolver(), cachedBitmap, savedImageName + ".jpg");
+                            Bitmap finishedBitmap = getFilter().processFilter(MainActivity.getOriginalBitmap());
+                            String url = StorageHelper.insertImage(getActivity().getContentResolver(), finishedBitmap, savedImageName + ".jpg");
                             Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                             File f = new File(url);
                             Uri contentUri = Uri.fromFile(f);
