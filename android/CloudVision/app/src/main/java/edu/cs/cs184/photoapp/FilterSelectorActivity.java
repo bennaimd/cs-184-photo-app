@@ -19,6 +19,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -51,26 +52,27 @@ public class FilterSelectorActivity extends AppCompatActivity {
     private TabLayout mTabLayout;
     private ArrayList<FilterFragment> mFilterFragments;
 
-    public static int getDisplayWidth= 1;
-    public static int getDisplayHeight =1;
+    public static int getDisplayWidth = 1;
+    public static int getDisplayHeight = 1;
     private static FilterSelectorActivity activity;
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-            //savedInstanceState.getBundle("main");
-            showAllFilters = savedInstanceState.getBoolean("all");
-            featDialogShown = savedInstanceState.getBoolean("featDialog");
+        //savedInstanceState.getBundle("main");
+        showAllFilters = savedInstanceState.getBoolean("all");
+        featDialogShown = savedInstanceState.getBoolean("featDialog");
 
-            mViewPager.setCurrentItem(savedInstanceState.getInt("current", 1));
-            mTabLayout.getTabAt(savedInstanceState.getInt("tab",1)).select();
+        mViewPager.setCurrentItem(savedInstanceState.getInt("current", 1));
+        mTabLayout.getTabAt(savedInstanceState.getInt("tab",1)).select();
     }
     
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setNavigationBarColor(getResources().getColor(R.color.colorPrimaryDark));
         setContentView(R.layout.activity_filter_selector);
         updateWidth(this);
         mContext = getApplicationContext();
